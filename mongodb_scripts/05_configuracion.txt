@@ -1,0 +1,132 @@
+use("concesionario_db")
+
+db.createCollection("configuracion", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "Configuracion",
+      description: "Parametros globales del sistema del concesionario guardados en un unico documento de configuracion",
+      required: ["nombreEmpresa", "porcentajeIVA"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        nombreEmpresa: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 150,
+          description: "Nombre oficial del concesionario"
+        },
+        nit: {
+          bsonType: "string",
+          maxLength: 20,
+          description: "Numero de identificacion tributaria de la empresa"
+        },
+        direccion: {
+          bsonType: "string",
+          description: "Direccion fisica del concesionario"
+        },
+        telefono: {
+          bsonType: "string",
+          maxLength: 20,
+          description: "Telefono principal de contacto"
+        },
+        email: {
+          bsonType: "string",
+          pattern: "^.+@.+\\..+$",
+          description: "Correo electronico corporativo"
+        },
+        sitioWeb: {
+          bsonType: "string",
+          description: "URL del sitio web del concesionario"
+        },
+        porcentajeIVA: {
+          bsonType: "double",
+          minimum: 0,
+          maximum: 100,
+          description: "Porcentaje de IVA aplicado a todas las ventas"
+        },
+        moneda: {
+          bsonType: "string",
+          maxLength: 10,
+          description: "Codigo de moneda utilizado. Ejemplo: COP, USD"
+        },
+        horarioAtencion: {
+          bsonType: "object",
+          description: "Horario de atencion al publico guardado dentro del documento de configuracion",
+          properties: {
+            horaApertura: {
+              bsonType: "string",
+              pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+              description: "Hora de apertura en formato HH:MM"
+            },
+            horaCierre: {
+              bsonType: "string",
+              pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+              description: "Hora de cierre en formato HH:MM"
+            },
+            diasHabiles: {
+              bsonType: "array",
+              description: "Dias de la semana en que el concesionario atiende",
+              items: {
+                bsonType: "string",
+                enum: ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
+              }
+            }
+          }
+        },
+        politicas: {
+          bsonType: "array",
+          description: "Politicas del concesionario guardadas dentro del documento de configuracion",
+          items: {
+            bsonType: "object",
+            required: ["nombre", "descripcion"],
+            properties: {
+              nombre: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Nombre de la politica"
+              },
+              descripcion: {
+                bsonType: "string",
+                minLength: 1,
+                description: "Texto de la politica"
+              },
+              activa: {
+                bsonType: "bool",
+                description: "Indica si la politica esta vigente"
+              }
+            }
+          }
+        },
+        redesSociales: {
+          bsonType: "array",
+          description: "Cuentas de redes sociales del concesionario guardadas dentro del documento de configuracion",
+          items: {
+            bsonType: "object",
+            required: ["red", "url"],
+            properties: {
+              red: {
+                bsonType: "string",
+                enum: ["facebook", "instagram", "twitter", "youtube", "linkedin", "tiktok"],
+                description: "Nombre de la red social"
+              },
+              url: {
+                bsonType: "string",
+                minLength: 1,
+                description: "Enlace al perfil de la red social"
+              }
+            }
+          }
+        },
+        fechaActualizacion: {
+          bsonType: "date",
+          description: "Ultima vez que se modifico la configuracion del sistema"
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})

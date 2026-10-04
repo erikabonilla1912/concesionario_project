@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ accion }} Cotización{% endblock %}
+{% block nav_ventas %}active{% endblock %}
+{% block page_title %}{{ accion }} Cotización{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'lista_cotizaciones' %}">Cotizaciones</a><span>›</span><span>{{ accion }}</span></div>
+<div class="card" style="max-width:600px;">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {% if accion == 'Nueva' %}
+      <div class="form-group"><label class="form-label">Cliente *</label>
+        <select name="cliente" class="form-control" required>
+          <option value="">Seleccionar cliente...</option>
+          {% for c in clientes %}<option value="{{ c.pk }}">{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Vehículo *</label>
+        <select name="vehiculo" class="form-control" required>
+          <option value="">Seleccionar vehículo...</option>
+          {% for v in vehiculos %}<option value="{{ v.pk }}">{{ v }}</option>{% endfor %}
+        </select>
+      </div>
+      {% else %}
+      <div class="form-group"><label class="form-label">Estado</label>
+        <select name="estado" class="form-control">
+          <option value="pendiente" {% if cotizacion.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+          <option value="aprobada" {% if cotizacion.estado == 'aprobada' %}selected{% endif %}>Aprobada</option>
+          <option value="rechazada" {% if cotizacion.estado == 'rechazada' %}selected{% endif %}>Rechazada</option>
+        </select>
+      </div>
+      {% endif %}
+      <div class="form-group"><label class="form-label">Precio Ofertado *</label><input type="number" step="0.01" name="precio_ofertado" class="form-control" value="{{ cotizacion.precio_ofertado|default:'' }}" required></div>
+      <div class="form-group"><label class="form-label">Notas</label><textarea name="notas" class="form-control" rows="3">{{ cotizacion.notas|default:'' }}</textarea></div>
+      <div style="display:flex;gap:12px;">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'lista_cotizaciones' %}" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

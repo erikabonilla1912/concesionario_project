@@ -1,0 +1,225 @@
+use("concesionario_db")
+
+db.createCollection("usuarios", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "Usuario",
+      description: "Usuarios del sistema con su rol, auditoria, metas y notificaciones guardados dentro del mismo documento",
+      required: ["nombreUsuario", "contrasena", "nombre", "apellido", "email", "estaActivo", "activo"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        nombreUsuario: {
+          bsonType: "string",
+          minLength: 3,
+          maxLength: 150,
+          description: "Nombre de usuario para iniciar sesion"
+        },
+        contrasena: {
+          bsonType: "string",
+          minLength: 1,
+          description: "Contrasena hasheada del usuario"
+        },
+        nombre: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Primer nombre del usuario"
+        },
+        apellido: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Apellido del usuario"
+        },
+        email: {
+          bsonType: "string",
+          pattern: "^.+@.+\\..+$",
+          description: "Correo electronico del usuario"
+        },
+        telefono: {
+          bsonType: "string",
+          maxLength: 20,
+          description: "Telefono de contacto"
+        },
+        esAdministrador: {
+          bsonType: "bool",
+          description: "Indica si el usuario tiene permisos de administrador del sistema"
+        },
+        esSuperusuario: {
+          bsonType: "bool",
+          description: "Indica si el usuario tiene acceso total sin restricciones"
+        },
+        estaActivo: {
+          bsonType: "bool",
+          description: "Indica si la cuenta esta activa en el sistema"
+        },
+        activo: {
+          bsonType: "bool",
+          description: "Indica si el usuario esta habilitado para operar en el concesionario"
+        },
+        fechaCreacion: {
+          bsonType: "date",
+          description: "Fecha en que se creo la cuenta"
+        },
+        fechaActualizacion: {
+          bsonType: "date",
+          description: "Fecha de la ultima actualizacion del registro"
+        },
+        rol: {
+          bsonType: "object",
+          description: "Rol y permisos del usuario guardados dentro del mismo documento",
+          required: ["nombre"],
+          properties: {
+            nombre: {
+              bsonType: "string",
+              minLength: 1,
+              maxLength: 50,
+              description: "Nombre del rol asignado"
+            },
+            descripcion: {
+              bsonType: "string",
+              description: "Descripcion del rol"
+            },
+            permClientes: {
+              bsonType: "bool",
+              description: "Permiso para gestionar clientes y vehiculos"
+            },
+            permVentas: {
+              bsonType: "bool",
+              description: "Permiso para gestionar ventas y cotizaciones"
+            },
+            permHistorial: {
+              bsonType: "bool",
+              description: "Permiso para ver historial del vehiculo"
+            },
+            permPagos: {
+              bsonType: "bool",
+              description: "Permiso para gestionar pagos y facturacion"
+            },
+            permUsuarios: {
+              bsonType: "bool",
+              description: "Permiso para gestionar usuarios y roles"
+            }
+          }
+        },
+        auditoria: {
+          bsonType: "array",
+          description: "Registro de acciones realizadas por el usuario en el sistema",
+          items: {
+            bsonType: "object",
+            required: ["accion", "modulo", "fecha"],
+            properties: {
+              accion: {
+                bsonType: "string",
+                enum: ["login", "logout", "crear", "editar", "eliminar", "ver"],
+                description: "Tipo de accion realizada"
+              },
+              modulo: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Modulo donde se realizo la accion"
+              },
+              descripcion: {
+                bsonType: "string",
+                description: "Detalle de la accion"
+              },
+              ip: {
+                bsonType: "string",
+                description: "Direccion IP desde donde se realizo la accion"
+              },
+              fecha: {
+                bsonType: "date",
+                description: "Fecha y hora de la accion"
+              },
+              exitoso: {
+                bsonType: "bool",
+                description: "Indica si la accion fue exitosa"
+              }
+            }
+          }
+        },
+        metas: {
+          bsonType: "array",
+          description: "Metas de ventas mensuales asignadas al usuario",
+          items: {
+            bsonType: "object",
+            required: ["mes", "anio", "metaVentas"],
+            properties: {
+              mes: {
+                bsonType: "int",
+                minimum: 1,
+                maximum: 12,
+                description: "Mes de la meta"
+              },
+              anio: {
+                bsonType: "int",
+                minimum: 2000,
+                maximum: 2100,
+                description: "Ano de la meta"
+              },
+              metaVentas: {
+                bsonType: "int",
+                minimum: 0,
+                description: "Numero de ventas esperadas en el mes"
+              },
+              ventasRealizadas: {
+                bsonType: "int",
+                minimum: 0,
+                description: "Ventas logradas hasta el momento"
+              },
+              fechaAsignacion: {
+                bsonType: "date",
+                description: "Fecha en que se asigno la meta"
+              }
+            }
+          }
+        },
+        notificaciones: {
+          bsonType: "array",
+          description: "Notificaciones recibidas por este usuario guardadas dentro de su documento",
+          items: {
+            bsonType: "object",
+            required: ["remitente", "asunto", "mensaje", "fecha"],
+            properties: {
+              remitente: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 150,
+                description: "Nombre del usuario que envio la notificacion"
+              },
+              asunto: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 200,
+                description: "Asunto de la notificacion"
+              },
+              mensaje: {
+                bsonType: "string",
+                minLength: 1,
+                description: "Contenido del mensaje"
+              },
+              fecha: {
+                bsonType: "date",
+                description: "Fecha y hora de envio"
+              },
+              leida: {
+                bsonType: "bool",
+                description: "Indica si el usuario ha leido la notificacion"
+              },
+              fechaLectura: {
+                bsonType: ["date", "null"],
+                description: "Fecha en que se leyo la notificacion"
+              }
+            }
+          }
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})

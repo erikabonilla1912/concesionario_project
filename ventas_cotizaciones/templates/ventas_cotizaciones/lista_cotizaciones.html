@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Cotizaciones{% endblock %}
+{% block nav_ventas %}active{% endblock %}
+{% block page_title %}Ventas y Cotizaciones{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'lista_ventas' %}" class="btn btn-outline btn-sm">Ver Ventas</a>
+<a href="{% url 'nueva_cotizacion' %}" class="btn btn-primary btn-sm">+ Nueva Cotización</a>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Cliente</th>
+          <th>Vehículo</th>
+          <th>Precio Ofertado</th>
+          <th>Vendedor</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in cotizaciones %}
+        <tr>
+          <td>{{ c.pk }}</td>
+          <td>{{ c.cliente }}</td>
+          <td>{{ c.vehiculo.marca }} {{ c.vehiculo.modelo }}</td>
+          <td>${{ c.precio_ofertado|floatformat:0 }}</td>
+          <td>{{ c.vendedor.get_full_name|default:c.vendedor.username }}</td>
+          <td>{{ c.fecha }}</td>
+          <td><span class="badge badge-{{ c.estado }}">{{ c.get_estado_display }}</span></td>
+          <td style="display:flex;gap:8px;">
+            <a href="{% url 'editar_cotizacion' c.pk %}" class="btn btn-outline btn-sm">Editar</a>
+            {% if c.estado == 'aprobada' and not c.tiene_venta %}
+              <a href="{% url 'nueva_venta' c.pk %}" class="btn btn-primary btn-sm">✓ Vender</a>
+            {% endif %}
+            {% if c.tiene_venta %}
+              {% if c.tiene_factura %}
+                <a href="{% url 'detalle_factura' c.factura_pk %}" class="btn btn-outline btn-sm">Ver Factura</a>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty-state"><p>No hay cotizaciones.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

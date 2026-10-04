@@ -1,0 +1,453 @@
+use("concesionario_db")
+
+// ============================================================
+// COLECCION: usuarios
+// ============================================================
+
+db.usuarios.insertMany([
+  {
+    nombreUsuario: "admin",
+    contrasena: "pbkdf2_sha256$260000$abc123$hashedpassword==",
+    nombre: "Carlos",
+    apellido: "Ramirez",
+    email: "carlos.ramirez@concesionario.com",
+    telefono: "3001234567",
+    esAdministrador: true,
+    esSuperusuario: true,
+    estaActivo: true,
+    activo: true,
+    fechaCreacion: new Date("2024-01-10"),
+    fechaActualizacion: new Date("2024-08-15"),
+    rol: {
+      nombre: "Administrador",
+      descripcion: "Acceso total al sistema",
+      permClientes: true,
+      permVentas: true,
+      permHistorial: true,
+      permPagos: true,
+      permUsuarios: true
+    },
+    auditoria: [
+      {
+        accion: "login",
+        modulo: "autenticacion",
+        descripcion: "Inicio de sesion exitoso",
+        ip: "192.168.1.10",
+        fecha: new Date("2024-09-01T08:00:00"),
+        exitoso: true
+      },
+      {
+        accion: "crear",
+        modulo: "usuarios",
+        descripcion: "Creo el usuario vendedor01",
+        ip: "192.168.1.10",
+        fecha: new Date("2024-09-01T09:30:00"),
+        exitoso: true
+      }
+    ],
+    metas: [
+      {
+        mes: NumberInt(9),
+        anio: NumberInt(2024),
+        metaVentas: NumberInt(10),
+        ventasRealizadas: NumberInt(7),
+        fechaAsignacion: new Date("2024-09-01")
+      }
+    ],
+    notificaciones: [
+      {
+        remitente: "sistema",
+        asunto: "Bienvenido al sistema",
+        mensaje: "Su cuenta de administrador ha sido configurada correctamente.",
+        fecha: new Date("2024-01-10T10:00:00"),
+        leida: true,
+        fechaLectura: new Date("2024-01-10T10:05:00")
+      }
+    ]
+  },
+  {
+    nombreUsuario: "vendedor01",
+    contrasena: "pbkdf2_sha256$260000$xyz456$hashedpassword==",
+    nombre: "Laura",
+    apellido: "Gonzalez",
+    email: "laura.gonzalez@concesionario.com",
+    telefono: "3109876543",
+    esAdministrador: false,
+    esSuperusuario: false,
+    estaActivo: true,
+    activo: true,
+    fechaCreacion: new Date("2024-01-15"),
+    fechaActualizacion: new Date("2024-09-01"),
+    rol: {
+      nombre: "Vendedor",
+      descripcion: "Puede gestionar clientes, vehiculos y ventas",
+      permClientes: true,
+      permVentas: true,
+      permHistorial: true,
+      permPagos: false,
+      permUsuarios: false
+    },
+    auditoria: [
+      {
+        accion: "login",
+        modulo: "autenticacion",
+        descripcion: "Inicio de sesion",
+        ip: "192.168.1.25",
+        fecha: new Date("2024-09-02T08:15:00"),
+        exitoso: true
+      },
+      {
+        accion: "crear",
+        modulo: "clientes",
+        descripcion: "Registro de nuevo cliente",
+        ip: "192.168.1.25",
+        fecha: new Date("2024-09-02T09:00:00"),
+        exitoso: true
+      }
+    ],
+    metas: [
+      {
+        mes: NumberInt(9),
+        anio: NumberInt(2024),
+        metaVentas: NumberInt(5),
+        ventasRealizadas: NumberInt(3),
+        fechaAsignacion: new Date("2024-09-01")
+      },
+      {
+        mes: NumberInt(10),
+        anio: NumberInt(2024),
+        metaVentas: NumberInt(6),
+        ventasRealizadas: NumberInt(0),
+        fechaAsignacion: new Date("2024-10-01")
+      }
+    ],
+    notificaciones: [
+      {
+        remitente: "admin",
+        asunto: "Meta de ventas septiembre",
+        mensaje: "Te hemos asignado una meta de 5 ventas para este mes. Mucho exito!",
+        fecha: new Date("2024-09-01T08:00:00"),
+        leida: false,
+        fechaLectura: null
+      }
+    ]
+  }
+])
+
+// ============================================================
+// COLECCION: vehiculos
+// ============================================================
+
+db.vehiculos.insertMany([
+  {
+    marca: "Toyota",
+    modelo: "Corolla",
+    anio: NumberInt(2022),
+    color: "Blanco",
+    placa: "ABC123",
+    precio: Double(85000000),
+    kilometraje: NumberInt(15000),
+    estado: "disponible",
+    descripcion: "Vehiculo en excelente estado, un solo dueno, todos los servicios al dia.",
+    fechaIngreso: new Date("2024-03-10"),
+    fechaActualizacion: new Date("2024-09-01"),
+    propietariosAnteriores: [
+      {
+        nombre: "Miguel Perez Torres",
+        fechaInicio: new Date("2022-05-01"),
+        fechaFin: new Date("2024-03-05")
+      }
+    ],
+    mantenimientos: [
+      {
+        tipo: "Cambio de aceite",
+        descripcion: "Cambio de aceite 5W30 sintetico y filtro de aceite",
+        fecha: new Date("2023-06-15"),
+        costo: Double(180000)
+      },
+      {
+        tipo: "Revision de frenos",
+        descripcion: "Cambio de pastillas delanteras y revision de discos",
+        fecha: new Date("2024-01-20"),
+        costo: Double(350000)
+      }
+    ]
+  },
+  {
+    marca: "Chevrolet",
+    modelo: "Spark",
+    anio: NumberInt(2021),
+    color: "Rojo",
+    placa: "XYZ789",
+    precio: Double(42000000),
+    kilometraje: NumberInt(30000),
+    estado: "vendido",
+    descripcion: "Economico y perfecto para ciudad. Unico dueno.",
+    fechaIngreso: new Date("2024-01-05"),
+    fechaActualizacion: new Date("2024-09-10"),
+    propietariosAnteriores: [],
+    mantenimientos: [
+      {
+        tipo: "Cambio de aceite",
+        descripcion: "Aceite 10W40 mineral",
+        fecha: new Date("2023-11-01"),
+        costo: Double(120000)
+      }
+    ]
+  },
+  {
+    marca: "Mazda",
+    modelo: "CX-5",
+    anio: NumberInt(2023),
+    color: "Gris Meteoro",
+    placa: "MZD456",
+    precio: Double(145000000),
+    kilometraje: NumberInt(5000),
+    estado: "reservado",
+    descripcion: "SUV premium casi nueva, cero accidentes, full equipo.",
+    fechaIngreso: new Date("2024-07-20"),
+    fechaActualizacion: new Date("2024-09-05"),
+    propietariosAnteriores: [],
+    mantenimientos: []
+  }
+])
+
+// ============================================================
+// COLECCION: clientes
+// ============================================================
+
+db.clientes.insertMany([
+  {
+    nombre: "Andres",
+    apellido: "Moreno",
+    cedula: "1020304050",
+    email: "andres.moreno@gmail.com",
+    telefono: "3156789012",
+    direccion: "Calle 45 # 12-30, Bogota",
+    fechaRegistro: new Date("2024-09-02"),
+    cotizaciones: [
+      {
+        vehiculo: {
+          marca: "Chevrolet",
+          modelo: "Spark",
+          anio: NumberInt(2021),
+          placa: "XYZ789",
+          precio: Double(42000000)
+        },
+        vendedor: {
+          nombreUsuario: "vendedor01",
+          nombre: "Laura",
+          apellido: "Gonzalez"
+        },
+        precioOfertado: Double(40500000),
+        fecha: new Date("2024-09-02"),
+        estado: "aprobada",
+        notas: "Cliente solicito descuento por pago de contado.",
+        venta: {
+          fechaVenta: new Date("2024-09-05"),
+          precioFinal: Double(40500000),
+          formaPago: "Contado",
+          factura: {
+            numeroFactura: "FAC-000001",
+            fechaEmision: new Date("2024-09-05"),
+            subtotal: Double(34033613.45),
+            impuesto: Double(6466386.55),
+            total: Double(40500000),
+            pagos: [
+              {
+                tipo: "contado",
+                monto: Double(40500000),
+                fecha: new Date("2024-09-05"),
+                numeroCuota: null
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    nombre: "Sofia",
+    apellido: "Vargas",
+    cedula: "52987654",
+    email: "sofia.vargas@hotmail.com",
+    telefono: "3204561234",
+    direccion: "Carrera 80 # 55-10, Medellin",
+    fechaRegistro: new Date("2024-09-05"),
+    cotizaciones: [
+      {
+        vehiculo: {
+          marca: "Mazda",
+          modelo: "CX-5",
+          anio: NumberInt(2023),
+          placa: "MZD456",
+          precio: Double(145000000)
+        },
+        vendedor: {
+          nombreUsuario: "vendedor01",
+          nombre: "Laura",
+          apellido: "Gonzalez"
+        },
+        precioOfertado: Double(140000000),
+        fecha: new Date("2024-09-05"),
+        estado: "pendiente",
+        notas: "Cliente evaluando financiacion con banco."
+      },
+      {
+        vehiculo: {
+          marca: "Toyota",
+          modelo: "Corolla",
+          anio: NumberInt(2022),
+          placa: "ABC123",
+          precio: Double(85000000)
+        },
+        vendedor: {
+          nombreUsuario: "admin",
+          nombre: "Carlos",
+          apellido: "Ramirez"
+        },
+        precioOfertado: Double(83000000),
+        fecha: new Date("2024-08-20"),
+        estado: "rechazada",
+        notas: "Cliente decidio no continuar con el proceso."
+      }
+    ]
+  },
+  {
+    nombre: "Julian",
+    apellido: "Castro",
+    cedula: "79654321",
+    email: "julian.castro@yahoo.com",
+    telefono: "3118765432",
+    direccion: "Avenida 30 # 10-50, Cali",
+    fechaRegistro: new Date("2024-07-15"),
+    cotizaciones: []
+  }
+])
+
+// ============================================================
+// COLECCION: plantillasCotizacion
+// ============================================================
+
+db.plantillasCotizacion.insertMany([
+  {
+    nombre: "Plantilla Estandar Contado",
+    descripcion: "Plantilla utilizada para ventas de contado con terminos generales del concesionario",
+    activa: true,
+    fechaCreacion: new Date("2024-01-20"),
+    fechaActualizacion: new Date("2024-06-01"),
+    creadoPor: {
+      nombreUsuario: "admin",
+      nombre: "Carlos",
+      apellido: "Ramirez"
+    },
+    condiciones: [
+      {
+        titulo: "Validez de la cotizacion",
+        contenido: "Esta cotizacion tiene una validez de 5 dias habiles a partir de la fecha de emision.",
+        orden: NumberInt(1)
+      },
+      {
+        titulo: "Forma de pago",
+        contenido: "El pago debe realizarse en su totalidad antes de la entrega del vehiculo.",
+        orden: NumberInt(2)
+      },
+      {
+        titulo: "Transferencia de propiedad",
+        contenido: "Los tramites de traspaso seran realizados por el concesionario en un plazo maximo de 10 dias habiles.",
+        orden: NumberInt(3)
+      }
+    ],
+    descuentos: [
+      {
+        nombre: "Descuento por pago de contado",
+        porcentaje: Double(3.5),
+        descripcion: "Aplica cuando el cliente cancela el valor total al momento de la venta"
+      }
+    ],
+    notasAdicionales: "Precios sujetos a cambio sin previo aviso. IVA incluido en el precio final."
+  },
+  {
+    nombre: "Plantilla Financiacion Bancaria",
+    descripcion: "Plantilla para ventas con credito bancario externo",
+    activa: true,
+    fechaCreacion: new Date("2024-02-10"),
+    fechaActualizacion: new Date("2024-08-15"),
+    creadoPor: {
+      nombreUsuario: "admin",
+      nombre: "Carlos",
+      apellido: "Ramirez"
+    },
+    condiciones: [
+      {
+        titulo: "Aprobacion del credito",
+        contenido: "La entrega del vehiculo esta sujeta a la aprobacion del credito por parte de la entidad bancaria.",
+        orden: NumberInt(1)
+      },
+      {
+        titulo: "Cuota inicial",
+        contenido: "Se requiere cuota inicial minima del 20% del valor del vehiculo para iniciar el tramite.",
+        orden: NumberInt(2)
+      },
+      {
+        titulo: "Documentacion requerida",
+        contenido: "El cliente debe presentar certificado de ingresos, extractos bancarios de los ultimos 3 meses y declaracion de renta.",
+        orden: NumberInt(3)
+      }
+    ],
+    descuentos: [],
+    notasAdicionales: "Tasas de interes segun el banco financiador. El concesionario no asume responsabilidad por la decision del banco."
+  }
+])
+
+// ============================================================
+// COLECCION: configuracion
+// ============================================================
+
+db.configuracion.insertOne({
+  nombreEmpresa: "Concesionario AutoPrime S.A.S.",
+  nit: "900123456-7",
+  direccion: "Autopista Norte Km 5, Bodega 12, Bogota",
+  telefono: "6017654321",
+  email: "contacto@autoprime.com.co",
+  sitioWeb: "https://www.autoprime.com.co",
+  porcentajeIVA: Double(19),
+  moneda: "COP",
+  horarioAtencion: {
+    horaApertura: "08:00",
+    horaCierre: "18:00",
+    diasHabiles: ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado"]
+  },
+  politicas: [
+    {
+      nombre: "Politica de devolucion",
+      descripcion: "No se aceptan devoluciones de vehiculos usados una vez firmada el acta de entrega. Vehiculos nuevos tienen 72 horas para reportar defectos de fabrica.",
+      activa: true
+    },
+    {
+      nombre: "Politica de garantia",
+      descripcion: "Todos los vehiculos del inventario cuentan con garantia mecanica de 3 meses o 5.000 km, lo que ocurra primero.",
+      activa: true
+    },
+    {
+      nombre: "Politica de privacidad",
+      descripcion: "Los datos personales de los clientes son tratados bajo los lineamientos de la Ley 1581 de 2012 de habeas data.",
+      activa: true
+    }
+  ],
+  redesSociales: [
+    {
+      red: "facebook",
+      url: "https://www.facebook.com/autoprimecol"
+    },
+    {
+      red: "instagram",
+      url: "https://www.instagram.com/autoprimecol"
+    },
+    {
+      red: "youtube",
+      url: "https://www.youtube.com/@autoprimecol"
+    }
+  ],
+  fechaActualizacion: new Date("2024-09-01")
+})

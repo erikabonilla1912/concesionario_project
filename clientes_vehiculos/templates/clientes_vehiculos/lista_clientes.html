@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Clientes{% endblock %}
+{% block nav_clientes %}active{% endblock %}
+{% block page_title %}Clientes{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'lista_vehiculos' %}" class="btn btn-outline btn-sm">Ver Vehículos</a>
+<a href="{% url 'nuevo_cliente' %}" class="btn btn-primary btn-sm">+ Nuevo Cliente</a>
+{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-body" style="padding:16px 24px;">
+    <form method="get" style="display:flex;gap:12px;">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Buscar por nombre o cédula..." style="max-width:320px;">
+      <button type="submit" class="btn btn-outline btn-sm">Buscar</button>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Nombre</th><th>Cédula</th><th>Teléfono</th><th>Email</th><th>Registro</th><th>Acciones</th></tr></thead>
+      <tbody>
+        {% for c in clientes %}
+        <tr>
+          <td><strong>{{ c.nombre }} {{ c.apellido }}</strong></td>
+          <td>{{ c.cedula }}</td>
+          <td>{{ c.telefono }}</td>
+          <td>{{ c.email|default:"—" }}</td>
+          <td>{{ c.fecha_registro }}</td>
+          <td style="display:flex;gap:8px;">
+            <a href="{% url 'editar_cliente' c.pk %}" class="btn btn-outline btn-sm">Editar</a>
+            <a href="{% url 'eliminar_cliente' c.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty-state"><p>No hay clientes registrados.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

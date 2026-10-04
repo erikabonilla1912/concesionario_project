@@ -1,0 +1,121 @@
+use("concesionario_db")
+
+db.createCollection("plantillasCotizacion", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "PlantillaCotizacion",
+      description: "Plantillas reutilizables para generar cotizaciones. El creador y las condiciones se guardan dentro del mismo documento",
+      required: ["nombre", "creadoPor", "fechaCreacion"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        nombre: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Nombre descriptivo de la plantilla"
+        },
+        descripcion: {
+          bsonType: "string",
+          description: "Descripcion del uso o proposito de esta plantilla"
+        },
+        activa: {
+          bsonType: "bool",
+          description: "Indica si la plantilla esta disponible para ser usada"
+        },
+        fechaCreacion: {
+          bsonType: "date",
+          description: "Fecha en que se creo la plantilla"
+        },
+        fechaActualizacion: {
+          bsonType: "date",
+          description: "Fecha de la ultima modificacion"
+        },
+        creadoPor: {
+          bsonType: "object",
+          description: "Datos del usuario que creo la plantilla guardados dentro del mismo documento",
+          required: ["nombreUsuario", "nombre", "apellido"],
+          properties: {
+            nombreUsuario: {
+              bsonType: "string",
+              minLength: 1,
+              description: "Nombre de usuario del creador"
+            },
+            nombre: {
+              bsonType: "string",
+              minLength: 1,
+              maxLength: 100,
+              description: "Nombre del creador"
+            },
+            apellido: {
+              bsonType: "string",
+              minLength: 1,
+              maxLength: 100,
+              description: "Apellido del creador"
+            }
+          }
+        },
+        condiciones: {
+          bsonType: "array",
+          description: "Lista de condiciones o clausulas incluidas en la plantilla",
+          items: {
+            bsonType: "object",
+            required: ["titulo", "contenido"],
+            properties: {
+              titulo: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 150,
+                description: "Titulo de la condicion"
+              },
+              contenido: {
+                bsonType: "string",
+                minLength: 1,
+                description: "Texto completo de la condicion"
+              },
+              orden: {
+                bsonType: "int",
+                minimum: 1,
+                description: "Orden de aparicion en la plantilla"
+              }
+            }
+          }
+        },
+        descuentos: {
+          bsonType: "array",
+          description: "Descuentos configurados en esta plantilla",
+          items: {
+            bsonType: "object",
+            required: ["nombre", "porcentaje"],
+            properties: {
+              nombre: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Nombre del descuento"
+              },
+              porcentaje: {
+                bsonType: "double",
+                minimum: 0,
+                maximum: 100,
+                description: "Porcentaje de descuento a aplicar"
+              },
+              descripcion: {
+                bsonType: "string",
+                description: "Descripcion del descuento"
+              }
+            }
+          }
+        },
+        notasAdicionales: {
+          bsonType: "string",
+          description: "Notas o aclaraciones adicionales de la plantilla"
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})

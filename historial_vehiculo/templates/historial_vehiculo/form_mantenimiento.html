@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Nuevo Mantenimiento{% endblock %}
+{% block nav_historial %}active{% endblock %}
+{% block page_title %}Registrar Mantenimiento{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'lista_historial' %}">Historial</a><span>›</span><span>Nuevo Mantenimiento</span></div>
+<div class="card" style="max-width:560px;">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group"><label class="form-label">Vehículo *</label>
+        <select name="vehiculo" class="form-control" required>
+          <option value="">Seleccionar...</option>
+          {% for v in vehiculos %}<option value="{{ v.pk }}">{{ v }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Tipo de Mantenimiento *</label><input type="text" name="tipo" class="form-control" required placeholder="ej: Cambio de aceite"></div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea name="descripcion" class="form-control" rows="3"></textarea></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Fecha *</label><input type="date" name="fecha" class="form-control" required></div>
+        <div class="form-group"><label class="form-label">Costo *</label><input type="number" step="0.01" name="costo" class="form-control" required></div>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'lista_historial' %}" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

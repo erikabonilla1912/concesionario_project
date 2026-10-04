@@ -1,0 +1,187 @@
+use("concesionario_db")
+
+db.createCollection("clientes", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "Cliente",
+      description: "Clientes del concesionario con sus cotizaciones, ventas, facturas y pagos guardados dentro del mismo documento",
+      required: ["nombre", "apellido", "cedula", "telefono"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        nombre: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Nombre del cliente"
+        },
+        apellido: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Apellido del cliente"
+        },
+        cedula: {
+          bsonType: "string",
+          minLength: 5,
+          maxLength: 20,
+          description: "Numero de cedula unico del cliente"
+        },
+        email: {
+          bsonType: "string",
+          pattern: "^.+@.+\\..+$",
+          description: "Correo electronico del cliente"
+        },
+        telefono: {
+          bsonType: "string",
+          maxLength: 20,
+          description: "Telefono de contacto del cliente"
+        },
+        direccion: {
+          bsonType: "string",
+          description: "Direccion del cliente"
+        },
+        fechaRegistro: {
+          bsonType: "date",
+          description: "Fecha en que el cliente fue registrado en el sistema"
+        },
+        cotizaciones: {
+          bsonType: "array",
+          description: "Cotizaciones realizadas al cliente con su venta, factura y pagos guardados dentro del mismo documento",
+          items: {
+            bsonType: "object",
+            required: ["vehiculo", "vendedor", "precioOfertado", "fecha", "estado"],
+            properties: {
+              vehiculo: {
+                bsonType: "object",
+                description: "Datos del vehiculo al momento de la cotizacion",
+                required: ["marca", "modelo", "anio", "placa"],
+                properties: {
+                  marca: { bsonType: "string", minLength: 1, maxLength: 50, description: "Marca del vehiculo" },
+                  modelo: { bsonType: "string", minLength: 1, maxLength: 50, description: "Modelo del vehiculo" },
+                  anio: { bsonType: "int", minimum: 1900, maximum: 2030, description: "Ano del vehiculo" },
+                  placa: { bsonType: "string", minLength: 1, maxLength: 10, description: "Placa del vehiculo" },
+                  precio: { bsonType: ["double", "null"], minimum: 0, description: "Precio base del vehiculo" }
+                }
+              },
+              vendedor: {
+                bsonType: "object",
+                description: "Datos del vendedor que atendio la cotizacion",
+                required: ["nombreUsuario", "nombre", "apellido"],
+                properties: {
+                  nombreUsuario: { bsonType: "string", minLength: 1, description: "Nombre de usuario del vendedor" },
+                  nombre: { bsonType: "string", minLength: 1, maxLength: 100, description: "Nombre del vendedor" },
+                  apellido: { bsonType: "string", minLength: 1, maxLength: 100, description: "Apellido del vendedor" }
+                }
+              },
+              precioOfertado: {
+                bsonType: ["double", "null"],
+                minimum: 0,
+                description: "Precio ofertado al cliente"
+              },
+              fecha: {
+                bsonType: "date",
+                description: "Fecha en que se realizo la cotizacion"
+              },
+              estado: {
+                bsonType: "string",
+                enum: ["pendiente", "aprobada", "rechazada"],
+                description: "Estado actual de la cotizacion"
+              },
+              notas: {
+                bsonType: "string",
+                description: "Observaciones adicionales sobre la cotizacion"
+              },
+              venta: {
+                bsonType: "object",
+                description: "Venta generada a partir de esta cotizacion guardada dentro del mismo documento",
+                properties: {
+                  fechaVenta: {
+                    bsonType: "date",
+                    description: "Fecha en que se concluyo la venta"
+                  },
+                  precioFinal: {
+                    bsonType: ["double", "null"],
+                    minimum: 0,
+                    description: "Precio final acordado con el cliente"
+                  },
+                  formaPago: {
+                    bsonType: "string",
+                    maxLength: 50,
+                    description: "Forma de pago utilizada"
+                  },
+                  factura: {
+                    bsonType: "object",
+                    description: "Factura de la venta con sus pagos guardada dentro del mismo documento",
+                    required: ["numeroFactura", "fechaEmision"],
+                    properties: {
+                      numeroFactura: {
+                        bsonType: "string",
+                        minLength: 1,
+                        maxLength: 20,
+                        pattern: "^FAC-[0-9]{6}$",
+                        description: "Numero unico de factura. Formato: FAC-XXXXXX"
+                      },
+                      fechaEmision: {
+                        bsonType: "date",
+                        description: "Fecha de emision de la factura"
+                      },
+                      subtotal: {
+                        bsonType: ["double", "null"],
+                        minimum: 0,
+                        description: "Subtotal antes de impuestos"
+                      },
+                      impuesto: {
+                        bsonType: ["double", "null"],
+                        minimum: 0,
+                        description: "Valor del IVA aplicado"
+                      },
+                      total: {
+                        bsonType: ["double", "null"],
+                        minimum: 0,
+                        description: "Total a pagar"
+                      },
+                      pagos: {
+                        bsonType: "array",
+                        description: "Pagos realizados para esta factura guardados dentro del mismo documento",
+                        items: {
+                          bsonType: "object",
+                          required: ["tipo", "monto", "fecha"],
+                          properties: {
+                            tipo: {
+                              bsonType: "string",
+                              enum: ["contado", "cuota"],
+                              description: "Tipo de pago realizado"
+                            },
+                            monto: {
+                              bsonType: ["double", "null"],
+                              minimum: 0,
+                              description: "Monto del pago"
+                            },
+                            fecha: {
+                              bsonType: "date",
+                              description: "Fecha en que se realizo el pago"
+                            },
+                            numeroCuota: {
+                              bsonType: ["int", "null"],
+                              minimum: 1,
+                              description: "Numero de cuota si el pago es de tipo cuota"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Inventario{% endblock %}
+{% block nav_vehiculos %}active{% endblock %}
+{% block page_title %}Inventario de Vehículos{% endblock %}
+{% block topbar_actions %}
+<a href="?estado=disponible" class="btn btn-outline btn-sm">Disponibles</a>
+<a href="{% url 'lista_vehiculos' %}" class="btn btn-outline btn-sm">Todos</a>
+<a href="{% url 'nuevo_vehiculo' %}" class="btn btn-primary btn-sm">+ Nuevo Vehículo</a>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Vehículo</th><th>Placa</th><th>Año</th><th>Color</th><th>Precio</th><th>Km</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        {% for v in vehiculos %}
+        <tr>
+          <td><strong>{{ v.marca }} {{ v.modelo }}</strong></td>
+          <td>{{ v.placa }}</td>
+          <td>{{ v.anio }}</td>
+          <td>{{ v.color }}</td>
+          <td>${{ v.precio|floatformat:0 }}</td>
+          <td>{{ v.kilometraje|floatformat:0 }} km</td>
+          <td><span class="badge badge-{{ v.estado }}">{{ v.get_estado_display }}</span></td>
+          <td style="display:flex;gap:8px;">
+            <a href="{% url 'editar_vehiculo' v.pk %}" class="btn btn-outline btn-sm">Editar</a>
+            <a href="{% url 'eliminar_vehiculo' v.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty-state"><p>No hay vehículos en inventario.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

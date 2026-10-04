@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Factura {{ factura.numero_factura }}{% endblock %}
+{% block nav_pagos %}active{% endblock %}
+{% block page_title %}Detalle Factura{% endblock %}
+{% block topbar_actions %}
+  {% if factura.estado_pago != 'pagado' %}
+    <a href="{% url 'nuevo_pago' factura.pk %}" class="btn btn-primary btn-sm">+ Registrar Pago</a>
+  {% endif %}
+{% endblock %}
+{% block content %}
+<style>
+  .saldo-ok { color: #4caf50; }
+  .saldo-mal { color: #e05252; }
+  .badge-pagado   { background:rgba(76,175,80,0.15);  color:#4caf50;  border:1px solid rgba(76,175,80,0.3);  font-size:0.9rem; padding:6px 14px; }
+  .badge-parcial  { background:rgba(255,193,7,0.15);  color:#ffc107;  border:1px solid rgba(255,193,7,0.3);  font-size:0.9rem; padding:6px 14px; }
+  .badge-pendiente{ background:rgba(224,82,82,0.15);  color:#e05252;  border:1px solid rgba(224,82,82,0.3);  font-size:0.9rem; padding:6px 14px; }
+</style>
+<div class="breadcrumb">
+  <a href="{% url 'lista_facturas' %}">Facturas</a>
+  <span>›</span>
+  <span>{{ factura.numero_factura }}</span>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+
+  <div class="card"><div class="card-body">
+    <h4 style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-bottom:16px;">{{ factura.numero_factura }}</h4>
+    <p style="color:var(--texto-suave);font-size:0.85rem;margin-bottom:6px;">
+      Cliente: <strong style="color:var(--texto)">{{ factura.venta.cotizacion.cliente }}</strong>
+    </p>
+    <p style="color:var(--texto-suave);font-size:0.85rem;margin-bottom:6px;">
+      Vehículo: <strong style="color:var(--texto)">{{ factura.venta.cotizacion.vehiculo }}</strong>
+    </p>
+    <p style="color:var(--texto-suave);font-size:0.85rem;margin-bottom:12px;">
+      Fecha: <strong style="color:var(--texto)">{{ factura.fecha_emision }}</strong>
+    </p>
+    {% if factura.estado_pago == 'pagado' %}
+      <span class="badge badge-pagado">✓ Pagado</span>
+    {% elif factura.estado_pago == 'parcial' %}
+      <span class="badge badge-parcial">Pago Parcial</span>
+    {% else %}
+      <span class="badge badge-pendiente">Pendiente de Pago</span>
+    {% endif %}
+  </div></div>
+
+  <div class="card"><div class="card-body">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.87rem;">
+      <span style="color:var(--texto-suave)">Subtotal</span>
+      <span>${{ factura.subtotal|floatformat:0 }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.87rem;">
+      <span style="color:var(--texto-suave)">IVA (19%)</span>
+      <span>${{ factura.impuesto|floatformat:0 }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--linea);font-size:1rem;font-weight:600;">
+      <span>Total</span>
+      <span style="color:var(--dorado)">${{ factura.total|floatformat:0 }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:0.87rem;">
+      <span style="color:var(--texto-suave)">Total Pagado</span>
+      <span class="saldo-ok">${{ factura.total_pagado|floatformat:0 }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:0.87rem;">
+      <span style="color:var(--texto-suave)">Saldo Pendiente</span>
+      {% if factura.saldo_pendiente <= 0 %}
+        <span class="saldo-ok">${{ factura.saldo_pendiente|floatformat:0 }}</span>
+      {% else %}
+        <span class="saldo-mal">${{ factura.saldo_pendiente|floatformat:0 }}</span>
+      {% endif %}
+    </div>
+  </div></div>
+
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="card-title">Pagos Registrados</span></div>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Tipo</th><th>Monto</th><th>N° Cuota</th><th>Fecha</th></tr>
+      </thead>
+      <tbody>
+        {% for p in pagos %}
+        <tr>
+          <td>{{ p.get_tipo_display }}</td>
+          <td class="saldo-ok">${{ p.monto|floatformat:0 }}</td>
+          <td>{{ p.numero_cuota|default:"—" }}</td>
+          <td>{{ p.fecha }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4">
+            <div class="empty-state" style="padding:30px;"><p>Sin pagos registrados.</p></div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

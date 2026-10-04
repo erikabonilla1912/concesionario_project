@@ -1,0 +1,814 @@
+use("concesionario_db")
+
+// ============================================================
+// 1. COLECCION: usuarios
+//    Embebe: rol, auditoria, metas, notificaciones
+// ============================================================
+
+db.createCollection("usuarios", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "Usuario",
+      description: "Usuarios del sistema con su rol, auditoria, metas y notificaciones guardados dentro del mismo documento",
+      required: ["nombreUsuario", "contrasena", "nombre", "apellido", "email", "estaActivo", "activo"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        nombreUsuario: {
+          bsonType: "string",
+          minLength: 3,
+          maxLength: 150,
+          description: "Nombre de usuario para iniciar sesion"
+        },
+        contrasena: {
+          bsonType: "string",
+          minLength: 1,
+          description: "Contrasena hasheada del usuario"
+        },
+        nombre: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Primer nombre del usuario"
+        },
+        apellido: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Apellido del usuario"
+        },
+        email: {
+          bsonType: "string",
+          pattern: "^.+@.+\\..+$",
+          description: "Correo electronico del usuario"
+        },
+        telefono: {
+          bsonType: "string",
+          maxLength: 20,
+          description: "Telefono de contacto"
+        },
+        esAdministrador: {
+          bsonType: "bool",
+          description: "Indica si el usuario tiene permisos de administrador del sistema"
+        },
+        esSuperusuario: {
+          bsonType: "bool",
+          description: "Indica si el usuario tiene acceso total sin restricciones"
+        },
+        estaActivo: {
+          bsonType: "bool",
+          description: "Indica si la cuenta esta activa en el sistema"
+        },
+        activo: {
+          bsonType: "bool",
+          description: "Indica si el usuario esta habilitado para operar en el concesionario"
+        },
+        fechaCreacion: {
+          bsonType: "date",
+          description: "Fecha en que se creo la cuenta"
+        },
+        fechaActualizacion: {
+          bsonType: "date",
+          description: "Fecha de la ultima actualizacion del registro"
+        },
+        rol: {
+          bsonType: "object",
+          description: "Rol y permisos del usuario guardados dentro del mismo documento",
+          required: ["nombre"],
+          properties: {
+            nombre: {
+              bsonType: "string",
+              minLength: 1,
+              maxLength: 50,
+              description: "Nombre del rol asignado"
+            },
+            descripcion: {
+              bsonType: "string",
+              description: "Descripcion del rol"
+            },
+            permClientes: {
+              bsonType: "bool",
+              description: "Permiso para gestionar clientes y vehiculos"
+            },
+            permVentas: {
+              bsonType: "bool",
+              description: "Permiso para gestionar ventas y cotizaciones"
+            },
+            permHistorial: {
+              bsonType: "bool",
+              description: "Permiso para ver historial del vehiculo"
+            },
+            permPagos: {
+              bsonType: "bool",
+              description: "Permiso para gestionar pagos y facturacion"
+            },
+            permUsuarios: {
+              bsonType: "bool",
+              description: "Permiso para gestionar usuarios y roles"
+            }
+          }
+        },
+        auditoria: {
+          bsonType: "array",
+          description: "Registro de acciones realizadas por el usuario en el sistema",
+          items: {
+            bsonType: "object",
+            required: ["accion", "modulo", "fecha"],
+            properties: {
+              accion: {
+                bsonType: "string",
+                enum: ["login", "logout", "crear", "editar", "eliminar", "ver"],
+                description: "Tipo de accion realizada"
+              },
+              modulo: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Modulo donde se realizo la accion"
+              },
+              descripcion: {
+                bsonType: "string",
+                description: "Detalle de la accion"
+              },
+              ip: {
+                bsonType: "string",
+                description: "Direccion IP desde donde se realizo la accion"
+              },
+              fecha: {
+                bsonType: "date",
+                description: "Fecha y hora de la accion"
+              },
+              exitoso: {
+                bsonType: "bool",
+                description: "Indica si la accion fue exitosa"
+              }
+            }
+          }
+        },
+        metas: {
+          bsonType: "array",
+          description: "Metas de ventas mensuales asignadas al usuario",
+          items: {
+            bsonType: "object",
+            required: ["mes", "anio", "metaVentas"],
+            properties: {
+              mes: {
+                bsonType: "int",
+                minimum: 1,
+                maximum: 12,
+                description: "Mes de la meta"
+              },
+              anio: {
+                bsonType: "int",
+                minimum: 2000,
+                maximum: 2100,
+                description: "Ano de la meta"
+              },
+              metaVentas: {
+                bsonType: "int",
+                minimum: 0,
+                description: "Numero de ventas esperadas en el mes"
+              },
+              ventasRealizadas: {
+                bsonType: "int",
+                minimum: 0,
+                description: "Ventas logradas hasta el momento"
+              },
+              fechaAsignacion: {
+                bsonType: "date",
+                description: "Fecha en que se asigno la meta"
+              }
+            }
+          }
+        },
+        notificaciones: {
+          bsonType: "array",
+          description: "Notificaciones recibidas por este usuario guardadas dentro de su documento",
+          items: {
+            bsonType: "object",
+            required: ["remitente", "asunto", "mensaje", "fecha"],
+            properties: {
+              remitente: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 150,
+                description: "Nombre del usuario que envio la notificacion"
+              },
+              asunto: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 200,
+                description: "Asunto de la notificacion"
+              },
+              mensaje: {
+                bsonType: "string",
+                minLength: 1,
+                description: "Contenido del mensaje"
+              },
+              fecha: {
+                bsonType: "date",
+                description: "Fecha y hora de envio"
+              },
+              leida: {
+                bsonType: "bool",
+                description: "Indica si el usuario ha leido la notificacion"
+              },
+              fechaLectura: {
+                bsonType: ["date", "null"],
+                description: "Fecha en que se leyo la notificacion"
+              }
+            }
+          }
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})
+
+// ============================================================
+// 2. COLECCION: vehiculos
+//    Embebe: propietariosAnteriores, mantenimientos
+// ============================================================
+
+db.createCollection("vehiculos", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "Vehiculo",
+      description: "Vehiculos del inventario con propietarios anteriores y mantenimientos guardados dentro del mismo documento",
+      required: ["marca", "modelo", "anio", "placa", "estado"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        marca: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 50,
+          description: "Marca del vehiculo"
+        },
+        modelo: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 50,
+          description: "Modelo del vehiculo"
+        },
+        anio: {
+          bsonType: "int",
+          minimum: 1900,
+          maximum: 2030,
+          description: "Ano de fabricacion del vehiculo"
+        },
+        color: {
+          bsonType: "string",
+          maxLength: 30,
+          description: "Color del vehiculo"
+        },
+        placa: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 10,
+          description: "Placa unica del vehiculo"
+        },
+        precio: {
+          bsonType: ["double", "null"],
+          minimum: 0,
+          description: "Precio de venta en pesos colombianos"
+        },
+        kilometraje: {
+          bsonType: "int",
+          minimum: 0,
+          description: "Kilometraje actual del vehiculo"
+        },
+        estado: {
+          bsonType: "string",
+          enum: ["disponible", "reservado", "vendido"],
+          description: "Estado actual del vehiculo en el inventario"
+        },
+        descripcion: {
+          bsonType: "string",
+          description: "Descripcion adicional del vehiculo"
+        },
+        fechaIngreso: {
+          bsonType: "date",
+          description: "Fecha en que el vehiculo ingreso al inventario"
+        },
+        fechaActualizacion: {
+          bsonType: "date",
+          description: "Fecha de la ultima actualizacion del registro"
+        },
+        propietariosAnteriores: {
+          bsonType: "array",
+          description: "Historial de duenos anteriores guardado dentro del documento del vehiculo",
+          items: {
+            bsonType: "object",
+            required: ["nombre", "fechaInicio", "fechaFin"],
+            properties: {
+              nombre: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Nombre del propietario anterior"
+              },
+              fechaInicio: {
+                bsonType: "date",
+                description: "Fecha en que comenzo a ser propietario"
+              },
+              fechaFin: {
+                bsonType: "date",
+                description: "Fecha en que dejo de ser propietario"
+              }
+            }
+          }
+        },
+        mantenimientos: {
+          bsonType: "array",
+          description: "Historial de mantenimientos realizados al vehiculo guardado dentro del mismo documento",
+          items: {
+            bsonType: "object",
+            required: ["tipo", "fecha"],
+            properties: {
+              tipo: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Tipo de mantenimiento realizado"
+              },
+              descripcion: {
+                bsonType: "string",
+                description: "Descripcion del trabajo realizado"
+              },
+              fecha: {
+                bsonType: "date",
+                description: "Fecha en que se realizo el mantenimiento"
+              },
+              costo: {
+                bsonType: ["double", "null"],
+                minimum: 0,
+                description: "Costo del mantenimiento en pesos colombianos"
+              }
+            }
+          }
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})
+
+// ============================================================
+// 3. COLECCION: clientes
+//    Embebe: cotizaciones > venta > factura > pagos[]
+// ============================================================
+
+db.createCollection("clientes", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "Cliente",
+      description: "Clientes del concesionario con sus cotizaciones, ventas, facturas y pagos guardados dentro del mismo documento",
+      required: ["nombre", "apellido", "cedula", "telefono"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        nombre: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Nombre del cliente"
+        },
+        apellido: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Apellido del cliente"
+        },
+        cedula: {
+          bsonType: "string",
+          minLength: 5,
+          maxLength: 20,
+          description: "Numero de cedula unico del cliente"
+        },
+        email: {
+          bsonType: "string",
+          pattern: "^.+@.+\\..+$",
+          description: "Correo electronico del cliente"
+        },
+        telefono: {
+          bsonType: "string",
+          maxLength: 20,
+          description: "Telefono de contacto del cliente"
+        },
+        direccion: {
+          bsonType: "string",
+          description: "Direccion del cliente"
+        },
+        fechaRegistro: {
+          bsonType: "date",
+          description: "Fecha en que el cliente fue registrado en el sistema"
+        },
+        cotizaciones: {
+          bsonType: "array",
+          description: "Cotizaciones realizadas al cliente con su venta, factura y pagos guardados dentro del mismo documento",
+          items: {
+            bsonType: "object",
+            required: ["vehiculo", "vendedor", "precioOfertado", "fecha", "estado"],
+            properties: {
+              vehiculo: {
+                bsonType: "object",
+                description: "Datos del vehiculo al momento de la cotizacion",
+                required: ["marca", "modelo", "anio", "placa"],
+                properties: {
+                  marca: { bsonType: "string", minLength: 1, maxLength: 50, description: "Marca del vehiculo" },
+                  modelo: { bsonType: "string", minLength: 1, maxLength: 50, description: "Modelo del vehiculo" },
+                  anio: { bsonType: "int", minimum: 1900, maximum: 2030, description: "Ano del vehiculo" },
+                  placa: { bsonType: "string", minLength: 1, maxLength: 10, description: "Placa del vehiculo" },
+                  precio: { bsonType: ["double", "null"], minimum: 0, description: "Precio base del vehiculo" }
+                }
+              },
+              vendedor: {
+                bsonType: "object",
+                description: "Datos del vendedor que atendio la cotizacion",
+                required: ["nombreUsuario", "nombre", "apellido"],
+                properties: {
+                  nombreUsuario: { bsonType: "string", minLength: 1, description: "Nombre de usuario del vendedor" },
+                  nombre: { bsonType: "string", minLength: 1, maxLength: 100, description: "Nombre del vendedor" },
+                  apellido: { bsonType: "string", minLength: 1, maxLength: 100, description: "Apellido del vendedor" }
+                }
+              },
+              precioOfertado: {
+                bsonType: ["double", "null"],
+                minimum: 0,
+                description: "Precio ofertado al cliente"
+              },
+              fecha: {
+                bsonType: "date",
+                description: "Fecha en que se realizo la cotizacion"
+              },
+              estado: {
+                bsonType: "string",
+                enum: ["pendiente", "aprobada", "rechazada"],
+                description: "Estado actual de la cotizacion"
+              },
+              notas: {
+                bsonType: "string",
+                description: "Observaciones adicionales sobre la cotizacion"
+              },
+              venta: {
+                bsonType: "object",
+                description: "Venta generada a partir de esta cotizacion guardada dentro del mismo documento",
+                properties: {
+                  fechaVenta: {
+                    bsonType: "date",
+                    description: "Fecha en que se concluyo la venta"
+                  },
+                  precioFinal: {
+                    bsonType: ["double", "null"],
+                    minimum: 0,
+                    description: "Precio final acordado con el cliente"
+                  },
+                  formaPago: {
+                    bsonType: "string",
+                    maxLength: 50,
+                    description: "Forma de pago utilizada"
+                  },
+                  factura: {
+                    bsonType: "object",
+                    description: "Factura de la venta con sus pagos guardada dentro del mismo documento",
+                    required: ["numeroFactura", "fechaEmision"],
+                    properties: {
+                      numeroFactura: {
+                        bsonType: "string",
+                        minLength: 1,
+                        maxLength: 20,
+                        pattern: "^FAC-[0-9]{6}$",
+                        description: "Numero unico de factura. Formato: FAC-XXXXXX"
+                      },
+                      fechaEmision: {
+                        bsonType: "date",
+                        description: "Fecha de emision de la factura"
+                      },
+                      subtotal: {
+                        bsonType: ["double", "null"],
+                        minimum: 0,
+                        description: "Subtotal antes de impuestos"
+                      },
+                      impuesto: {
+                        bsonType: ["double", "null"],
+                        minimum: 0,
+                        description: "Valor del IVA aplicado"
+                      },
+                      total: {
+                        bsonType: ["double", "null"],
+                        minimum: 0,
+                        description: "Total a pagar"
+                      },
+                      pagos: {
+                        bsonType: "array",
+                        description: "Pagos realizados para esta factura guardados dentro del mismo documento",
+                        items: {
+                          bsonType: "object",
+                          required: ["tipo", "monto", "fecha"],
+                          properties: {
+                            tipo: {
+                              bsonType: "string",
+                              enum: ["contado", "cuota"],
+                              description: "Tipo de pago realizado"
+                            },
+                            monto: {
+                              bsonType: ["double", "null"],
+                              minimum: 0,
+                              description: "Monto del pago"
+                            },
+                            fecha: {
+                              bsonType: "date",
+                              description: "Fecha en que se realizo el pago"
+                            },
+                            numeroCuota: {
+                              bsonType: ["int", "null"],
+                              minimum: 1,
+                              description: "Numero de cuota si el pago es de tipo cuota"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})
+
+// ============================================================
+// 4. COLECCION: plantillasCotizacion
+//    Embebe: creadoPor, condiciones, descuentos
+// ============================================================
+
+db.createCollection("plantillasCotizacion", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "PlantillaCotizacion",
+      description: "Plantillas reutilizables para generar cotizaciones. El creador y las condiciones se guardan dentro del mismo documento",
+      required: ["nombre", "creadoPor", "fechaCreacion"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        nombre: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 100,
+          description: "Nombre descriptivo de la plantilla"
+        },
+        descripcion: {
+          bsonType: "string",
+          description: "Descripcion del uso o proposito de esta plantilla"
+        },
+        activa: {
+          bsonType: "bool",
+          description: "Indica si la plantilla esta disponible para ser usada"
+        },
+        fechaCreacion: {
+          bsonType: "date",
+          description: "Fecha en que se creo la plantilla"
+        },
+        fechaActualizacion: {
+          bsonType: "date",
+          description: "Fecha de la ultima modificacion"
+        },
+        creadoPor: {
+          bsonType: "object",
+          description: "Datos del usuario que creo la plantilla guardados dentro del mismo documento",
+          required: ["nombreUsuario", "nombre", "apellido"],
+          properties: {
+            nombreUsuario: {
+              bsonType: "string",
+              minLength: 1,
+              description: "Nombre de usuario del creador"
+            },
+            nombre: {
+              bsonType: "string",
+              minLength: 1,
+              maxLength: 100,
+              description: "Nombre del creador"
+            },
+            apellido: {
+              bsonType: "string",
+              minLength: 1,
+              maxLength: 100,
+              description: "Apellido del creador"
+            }
+          }
+        },
+        condiciones: {
+          bsonType: "array",
+          description: "Lista de condiciones o clausulas incluidas en la plantilla",
+          items: {
+            bsonType: "object",
+            required: ["titulo", "contenido"],
+            properties: {
+              titulo: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 150,
+                description: "Titulo de la condicion"
+              },
+              contenido: {
+                bsonType: "string",
+                minLength: 1,
+                description: "Texto completo de la condicion"
+              },
+              orden: {
+                bsonType: "int",
+                minimum: 1,
+                description: "Orden de aparicion en la plantilla"
+              }
+            }
+          }
+        },
+        descuentos: {
+          bsonType: "array",
+          description: "Descuentos configurados en esta plantilla",
+          items: {
+            bsonType: "object",
+            required: ["nombre", "porcentaje"],
+            properties: {
+              nombre: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Nombre del descuento"
+              },
+              porcentaje: {
+                bsonType: "double",
+                minimum: 0,
+                maximum: 100,
+                description: "Porcentaje de descuento a aplicar"
+              },
+              descripcion: {
+                bsonType: "string",
+                description: "Descripcion del descuento"
+              }
+            }
+          }
+        },
+        notasAdicionales: {
+          bsonType: "string",
+          description: "Notas o aclaraciones adicionales de la plantilla"
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})
+
+// ============================================================
+// 5. COLECCION: configuracion
+//    Embebe: horarioAtencion, politicas, redesSociales
+// ============================================================
+
+db.createCollection("configuracion", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "Configuracion",
+      description: "Parametros globales del sistema del concesionario guardados en un unico documento de configuracion",
+      required: ["nombreEmpresa", "porcentajeIVA"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        nombreEmpresa: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 150,
+          description: "Nombre oficial del concesionario"
+        },
+        nit: {
+          bsonType: "string",
+          maxLength: 20,
+          description: "Numero de identificacion tributaria de la empresa"
+        },
+        direccion: {
+          bsonType: "string",
+          description: "Direccion fisica del concesionario"
+        },
+        telefono: {
+          bsonType: "string",
+          maxLength: 20,
+          description: "Telefono principal de contacto"
+        },
+        email: {
+          bsonType: "string",
+          pattern: "^.+@.+\\..+$",
+          description: "Correo electronico corporativo"
+        },
+        sitioWeb: {
+          bsonType: "string",
+          description: "URL del sitio web del concesionario"
+        },
+        porcentajeIVA: {
+          bsonType: "double",
+          minimum: 0,
+          maximum: 100,
+          description: "Porcentaje de IVA aplicado a todas las ventas"
+        },
+        moneda: {
+          bsonType: "string",
+          maxLength: 10,
+          description: "Codigo de moneda utilizado. Ejemplo: COP, USD"
+        },
+        horarioAtencion: {
+          bsonType: "object",
+          description: "Horario de atencion al publico guardado dentro del documento de configuracion",
+          properties: {
+            horaApertura: {
+              bsonType: "string",
+              pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+              description: "Hora de apertura en formato HH:MM"
+            },
+            horaCierre: {
+              bsonType: "string",
+              pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+              description: "Hora de cierre en formato HH:MM"
+            },
+            diasHabiles: {
+              bsonType: "array",
+              description: "Dias de la semana en que el concesionario atiende",
+              items: {
+                bsonType: "string",
+                enum: ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
+              }
+            }
+          }
+        },
+        politicas: {
+          bsonType: "array",
+          description: "Politicas del concesionario guardadas dentro del documento de configuracion",
+          items: {
+            bsonType: "object",
+            required: ["nombre", "descripcion"],
+            properties: {
+              nombre: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Nombre de la politica"
+              },
+              descripcion: {
+                bsonType: "string",
+                minLength: 1,
+                description: "Texto de la politica"
+              },
+              activa: {
+                bsonType: "bool",
+                description: "Indica si la politica esta vigente"
+              }
+            }
+          }
+        },
+        redesSociales: {
+          bsonType: "array",
+          description: "Cuentas de redes sociales del concesionario guardadas dentro del documento de configuracion",
+          items: {
+            bsonType: "object",
+            required: ["red", "url"],
+            properties: {
+              red: {
+                bsonType: "string",
+                enum: ["facebook", "instagram", "twitter", "youtube", "linkedin", "tiktok"],
+                description: "Nombre de la red social"
+              },
+              url: {
+                bsonType: "string",
+                minLength: 1,
+                description: "Enlace al perfil de la red social"
+              }
+            }
+          }
+        },
+        fechaActualizacion: {
+          bsonType: "date",
+          description: "Ultima vez que se modifico la configuracion del sistema"
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})

@@ -1,0 +1,128 @@
+use("concesionario_db")
+
+db.createCollection("vehiculos", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      title: "Vehiculo",
+      description: "Vehiculos del inventario con propietarios anteriores y mantenimientos guardados dentro del mismo documento",
+      required: ["marca", "modelo", "anio", "placa", "estado"],
+      properties: {
+        _id: {
+          bsonType: "objectId",
+          description: "Identificador unico generado automaticamente"
+        },
+        marca: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 50,
+          description: "Marca del vehiculo"
+        },
+        modelo: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 50,
+          description: "Modelo del vehiculo"
+        },
+        anio: {
+          bsonType: "int",
+          minimum: 1900,
+          maximum: 2030,
+          description: "Ano de fabricacion del vehiculo"
+        },
+        color: {
+          bsonType: "string",
+          maxLength: 30,
+          description: "Color del vehiculo"
+        },
+        placa: {
+          bsonType: "string",
+          minLength: 1,
+          maxLength: 10,
+          description: "Placa unica del vehiculo"
+        },
+        precio: {
+          bsonType: ["double", "null"],
+          minimum: 0,
+          description: "Precio de venta en pesos colombianos"
+        },
+        kilometraje: {
+          bsonType: "int",
+          minimum: 0,
+          description: "Kilometraje actual del vehiculo"
+        },
+        estado: {
+          bsonType: "string",
+          enum: ["disponible", "reservado", "vendido"],
+          description: "Estado actual del vehiculo en el inventario"
+        },
+        descripcion: {
+          bsonType: "string",
+          description: "Descripcion adicional del vehiculo"
+        },
+        fechaIngreso: {
+          bsonType: "date",
+          description: "Fecha en que el vehiculo ingreso al inventario"
+        },
+        fechaActualizacion: {
+          bsonType: "date",
+          description: "Fecha de la ultima actualizacion del registro"
+        },
+        propietariosAnteriores: {
+          bsonType: "array",
+          description: "Historial de duenos anteriores guardado dentro del documento del vehiculo",
+          items: {
+            bsonType: "object",
+            required: ["nombre", "fechaInicio", "fechaFin"],
+            properties: {
+              nombre: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Nombre del propietario anterior"
+              },
+              fechaInicio: {
+                bsonType: "date",
+                description: "Fecha en que comenzo a ser propietario"
+              },
+              fechaFin: {
+                bsonType: "date",
+                description: "Fecha en que dejo de ser propietario"
+              }
+            }
+          }
+        },
+        mantenimientos: {
+          bsonType: "array",
+          description: "Historial de mantenimientos realizados al vehiculo guardado dentro del mismo documento",
+          items: {
+            bsonType: "object",
+            required: ["tipo", "fecha"],
+            properties: {
+              tipo: {
+                bsonType: "string",
+                minLength: 1,
+                maxLength: 100,
+                description: "Tipo de mantenimiento realizado"
+              },
+              descripcion: {
+                bsonType: "string",
+                description: "Descripcion del trabajo realizado"
+              },
+              fecha: {
+                bsonType: "date",
+                description: "Fecha en que se realizo el mantenimiento"
+              },
+              costo: {
+                bsonType: ["double", "null"],
+                minimum: 0,
+                description: "Costo del mantenimiento en pesos colombianos"
+              }
+            }
+          }
+        }
+      },
+      additionalProperties: false
+    }
+  }
+})

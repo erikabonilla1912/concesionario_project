@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Roles{% endblock %}
+{% block nav_usuarios %}active{% endblock %}
+{% block page_title %}Roles del Sistema{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'nuevo_rol' %}" class="btn btn-primary btn-sm">+ Nuevo Rol</a>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Rol</th>
+          <th>Descripción</th>
+          <th>Módulos con acceso</th>
+          <th>Usuarios</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in roles %}
+        <tr>
+          <td><strong>{{ r.nombre }}</strong></td>
+          <td>{{ r.descripcion|default:"—" }}</td>
+          <td>
+            {% if r.nombre|lower == 'administrador' %}
+              <span class="badge badge-disponible">Todos los módulos</span>
+            {% else %}
+              {% if r.perm_clientes %}<span class="badge badge-disponible" style="margin:2px;font-size:0.7rem;">Clientes</span>{% endif %}
+              {% if r.perm_ventas %}<span class="badge badge-disponible" style="margin:2px;font-size:0.7rem;">Ventas</span>{% endif %}
+              {% if r.perm_historial %}<span class="badge badge-disponible" style="margin:2px;font-size:0.7rem;">Historial</span>{% endif %}
+              {% if r.perm_pagos %}<span class="badge badge-disponible" style="margin:2px;font-size:0.7rem;">Pagos</span>{% endif %}
+              {% if r.perm_usuarios %}<span class="badge badge-disponible" style="margin:2px;font-size:0.7rem;">Usuarios</span>{% endif %}
+              {% if not r.perm_clientes and not r.perm_ventas and not r.perm_historial and not r.perm_pagos and not r.perm_usuarios %}
+                <span style="color:var(--texto-suave);font-size:0.85rem;">Sin acceso</span>
+              {% endif %}
+            {% endif %}
+          </td>
+          <td>{{ r.perfilusuario_set.count }}</td>
+          <td style="display:flex;gap:8px;">
+            <a href="{% url 'editar_rol' r.pk %}" class="btn btn-outline btn-sm">Editar</a>
+            <a href="{% url 'eliminar_rol' r.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5"><div class="empty-state"><p>No hay roles creados.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

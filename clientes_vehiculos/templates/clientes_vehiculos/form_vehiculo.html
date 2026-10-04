@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ accion }} Vehículo{% endblock %}
+{% block nav_vehiculos %}active{% endblock %}
+{% block page_title %}{{ accion }} Vehículo{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'lista_vehiculos' %}">Inventario</a><span>›</span><span>{{ accion }}</span></div>
+<div class="card" style="max-width:680px;">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Marca *</label><input type="text" name="marca" class="form-control" value="{{ vehiculo.marca|default:'' }}" required></div>
+        <div class="form-group"><label class="form-label">Modelo *</label><input type="text" name="modelo" class="form-control" value="{{ vehiculo.modelo|default:'' }}" required></div>
+        <div class="form-group"><label class="form-label">Año *</label><input type="number" name="anio" class="form-control" value="{{ vehiculo.anio|default:'2024' }}" required></div>
+        <div class="form-group"><label class="form-label">Color</label><input type="text" name="color" class="form-control" value="{{ vehiculo.color|default:'' }}"></div>
+        <div class="form-group"><label class="form-label">Placa *</label><input type="text" name="placa" class="form-control" value="{{ vehiculo.placa|default:'' }}" required></div>
+        <div class="form-group"><label class="form-label">Precio *</label><input type="number" step="0.01" name="precio" class="form-control" value="{{ vehiculo.precio|default:'' }}" required></div>
+        <div class="form-group"><label class="form-label">Kilometraje</label><input type="number" name="kilometraje" class="form-control" value="{{ vehiculo.kilometraje|default:0 }}"></div>
+        <div class="form-group"><label class="form-label">Estado</label>
+          <select name="estado" class="form-control">
+            <option value="disponible" {% if vehiculo.estado == 'disponible' %}selected{% endif %}>Disponible</option>
+            <option value="reservado" {% if vehiculo.estado == 'reservado' %}selected{% endif %}>Reservado</option>
+            <option value="vendido" {% if vehiculo.estado == 'vendido' %}selected{% endif %}>Vendido</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Descripción</label><textarea name="descripcion" class="form-control" rows="3">{{ vehiculo.descripcion|default:'' }}</textarea></div>
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'lista_vehiculos' %}" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

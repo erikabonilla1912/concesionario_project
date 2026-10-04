@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Ventas{% endblock %}
+{% block nav_ventas %}active{% endblock %}
+{% block page_title %}Ventas Cerradas{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'lista_cotizaciones' %}" class="btn btn-outline btn-sm">Ver Cotizaciones</a>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Cliente</th>
+          <th>Vehículo</th>
+          <th>Precio Final</th>
+          <th>Forma de Pago</th>
+          <th>Fecha</th>
+          <th>Factura</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in ventas %}
+        <tr>
+          <td>{{ v.pk }}</td>
+          <td>{{ v.cotizacion.cliente }}</td>
+          <td>{{ v.cotizacion.vehiculo.marca }} {{ v.cotizacion.vehiculo.modelo }}</td>
+          <td>${{ v.precio_final|floatformat:0 }}</td>
+          <td>{{ v.forma_pago }}</td>
+          <td>{{ v.fecha_venta }}</td>
+          <td>
+            {% if v.factura %}
+              <a href="{% url 'detalle_factura' v.factura.pk %}" class="btn btn-outline btn-sm">Ver Factura</a>
+            {% else %}
+              <a href="{% url 'nueva_factura' v.pk %}" class="btn btn-primary btn-sm">Generar Factura</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7">
+            <div class="empty-state"><p>No hay ventas registradas.</p></div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ accion }} Usuario{% endblock %}
+{% block nav_usuarios %}active{% endblock %}
+{% block page_title %}{{ accion }} Usuario{% endblock %}
+{% block content %}
+<div class="breadcrumb">
+  <a href="{% url 'lista_usuarios' %}">Usuarios</a>
+  <span>›</span><span>{{ accion }}</span>
+</div>
+<div class="card" style="max-width:680px;">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input type="text" name="first_name" class="form-control" value="{{ usuario.first_name|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Apellido</label>
+          <input type="text" name="last_name" class="form-control" value="{{ usuario.last_name|default:'' }}">
+        </div>
+        {% if accion == 'Nuevo' %}
+        <div class="form-group">
+          <label class="form-label">Usuario *</label>
+          <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña *</label>
+          <input type="password" name="password" class="form-control" required>
+        </div>
+        {% endif %}
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" value="{{ usuario.email|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input type="text" name="telefono" class="form-control" value="{{ perfil.telefono|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rol</label>
+          <select name="rol" class="form-control">
+            <option value="">Sin rol</option>
+            {% for r in roles %}
+            <option value="{{ r.pk }}" {% if perfil.rol.pk == r.pk %}selected{% endif %}>{{ r.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'lista_usuarios' %}" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

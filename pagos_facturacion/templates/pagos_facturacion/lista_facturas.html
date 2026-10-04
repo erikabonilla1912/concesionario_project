@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Facturas{% endblock %}
+{% block nav_pagos %}active{% endblock %}
+{% block page_title %}Pagos y Facturación{% endblock %}
+{% block content %}
+<style>
+  .saldo-ok { color: #4caf50; }
+  .saldo-mal { color: #e05252; }
+  .badge-pagado { background:rgba(76,175,80,0.15); color:#4caf50; border:1px solid rgba(76,175,80,0.3); }
+  .badge-parcial { background:rgba(255,193,7,0.15); color:#ffc107; border:1px solid rgba(255,193,7,0.3); }
+  .badge-pendiente { background:rgba(224,82,82,0.15); color:#e05252; border:1px solid rgba(224,82,82,0.3); }
+</style>
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>N° Factura</th>
+          <th>Cliente</th>
+          <th>Subtotal</th>
+          <th>IVA</th>
+          <th>Total</th>
+          <th>Pagado</th>
+          <th>Saldo</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in facturas %}
+        <tr>
+          <td><strong>{{ f.numero_factura }}</strong></td>
+          <td>{{ f.venta.cotizacion.cliente }}</td>
+          <td>${{ f.subtotal|floatformat:0 }}</td>
+          <td>${{ f.impuesto|floatformat:0 }}</td>
+          <td><strong>${{ f.total|floatformat:0 }}</strong></td>
+          <td class="saldo-ok">${{ f.total_pagado|floatformat:0 }}</td>
+          <td>
+            {% if f.saldo_pendiente <= 0 %}
+              <span class="saldo-ok">${{ f.saldo_pendiente|floatformat:0 }}</span>
+            {% else %}
+              <span class="saldo-mal">${{ f.saldo_pendiente|floatformat:0 }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if f.estado_pago == 'pagado' %}
+              <span class="badge badge-pagado">✓ Pagado</span>
+            {% elif f.estado_pago == 'parcial' %}
+              <span class="badge badge-parcial">Parcial</span>
+            {% else %}
+              <span class="badge badge-pendiente">Pendiente</span>
+            {% endif %}
+          </td>
+          <td>{{ f.fecha_emision }}</td>
+          <td style="display:flex;gap:8px;">
+            <a href="{% url 'detalle_factura' f.pk %}" class="btn btn-outline btn-sm">Ver</a>
+            {% if f.estado_pago != 'pagado' %}
+              <a href="{% url 'nuevo_pago' f.pk %}" class="btn btn-primary btn-sm">+ Pago</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="10">
+            <div class="empty-state" style="padding:40px;">
+              <p>No hay facturas. Las facturas se generan desde <a href="{% url 'lista_ventas' %}" style="color:var(--dorado);">Ventas</a>.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

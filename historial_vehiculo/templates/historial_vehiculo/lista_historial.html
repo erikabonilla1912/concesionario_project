@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Historial{% endblock %}
+{% block nav_historial %}active{% endblock %}
+{% block page_title %}Historial del Vehículo{% endblock %}
+{% block topbar_actions %}
+<a href="{% url 'nuevo_propietario' %}" class="btn btn-outline btn-sm">+ Propietario</a>
+<a href="{% url 'nuevo_mantenimiento' %}" class="btn btn-primary btn-sm">+ Mantenimiento</a>
+{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-body" style="padding:16px 24px;">
+    <form method="get" style="display:flex;gap:12px;align-items:center;">
+      <label class="form-label" style="margin:0;white-space:nowrap;">Filtrar por vehículo:</label>
+      <select name="vehiculo" class="form-control" style="max-width:280px;" onchange="this.form.submit()">
+        <option value="">Todos</option>
+        {% for v in vehiculos %}<option value="{{ v.pk }}" {% if vehiculo_id == v.pk|stringformat:"s" %}selected{% endif %}>{{ v }}</option>{% endfor %}
+      </select>
+    </form>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Mantenimientos</span></div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Vehículo</th><th>Tipo</th><th>Fecha</th><th>Costo</th></tr></thead>
+        <tbody>
+          {% for m in mantenimientos %}
+          <tr><td>{{ m.vehiculo.marca }} {{ m.vehiculo.modelo }}</td><td>{{ m.tipo }}</td><td>{{ m.fecha }}</td><td>${{ m.costo|floatformat:0 }}</td></tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state" style="padding:30px;"><p>Sin registros.</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Propietarios Anteriores</span></div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Vehículo</th><th>Propietario</th><th>Desde</th><th>Hasta</th></tr></thead>
+        <tbody>
+          {% for p in propietarios %}
+          <tr><td>{{ p.vehiculo.marca }} {{ p.vehiculo.modelo }}</td><td>{{ p.nombre }}</td><td>{{ p.fecha_inicio }}</td><td>{{ p.fecha_fin }}</td></tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state" style="padding:30px;"><p>Sin registros.</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
