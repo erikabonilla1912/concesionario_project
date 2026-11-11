@@ -6,13 +6,55 @@ import djongo.models.fields
 import historial_vehiculo.models
 
 
+def quitar_validacion(apps, schema_editor):
+    """El JSON Schema anterior exige 'cotizaciones' dentro del cliente y no permite
+    los campos nuevos: se quita mientras se migra y luego se vuelve a aplicar con
+    json_schema/validaciones.js."""
+    db = schema_editor.connection.connection
+    existentes = db.list_collection_names()
+    for coleccion in ['clientes', 'vehiculos', 'cotizaciones']:
+        if coleccion in existentes:
+            db.command('collMod', coleccion, validator={}, validationLevel='off')
+
+
+def mover_cotizaciones(apps, schema_editor):
+    """Antes las cotizaciones vivían dentro de cada cliente. Se copian a la colección
+    'cotizaciones' ANTES de quitar el campo (djongo lo borra con $unset)."""
+    db = schema_editor.connection.connection
+    esquema = db['__schema__'].find_one({'name': 'cotizaciones'}) or {}
+    contador = esquema.get('auto', {}).get('seq', 0)
+    movidas = 0
+    for cliente in db['clientes'].find({'cotizaciones.0': {'$exists': True}}):
+        for cotizacion in cliente['cotizaciones']:
+            contador += 1
+            db['cotizaciones'].insert_one({
+                'id': contador,
+                'id_cliente': cliente['id'],
+                'vehiculo': cotizacion.get('vehiculo'),
+                'vendedor': cotizacion.get('vendedor'),
+                'precio_ofertado': cotizacion.get('precio_ofertado'),
+                'fecha': cotizacion.get('fecha'),
+                'estado': cotizacion.get('estado', 'pendiente'),
+                'notas': cotizacion.get('notas', ''),
+                'venta': cotizacion.get('venta'),
+            }, bypass_document_validation=True)
+            movidas += 1
+    if movidas:
+        # El contador de ids de djongo debe seguir después de las cotizaciones movidas
+        db['__schema__'].update_one({'name': 'cotizaciones'}, {'$set': {'auto.seq': contador}})
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
         ('clientes_vehiculos', '0001_initial'),
+        # La colección cotizaciones debe existir antes de mover los datos
+        ('ventas_cotizaciones', '0002_cotizacion'),
     ]
 
     operations = [
+        migrations.RunPython(quitar_validacion, migrations.RunPython.noop),
+        migrations.RunPython(mover_cotizaciones, migrations.RunPython.noop),
         migrations.RemoveField(
             model_name='cliente',
             name='cotizaciones',
