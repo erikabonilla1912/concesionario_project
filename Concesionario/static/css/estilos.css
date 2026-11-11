@@ -430,13 +430,13 @@ tbody tr:hover { background: var(--fila-hover); }
 .badge-disponible, .badge-aprobada, .badge-pagada, .badge-activa, .badge-activo {
     background: var(--exito-claro); color: var(--exito);
 }
-.badge-reservado, .badge-pendiente, .badge-emitida {
+.badge-reservado, .badge-pendiente, .badge-emitida, .badge-parcial {
     background: var(--alerta-claro); color: var(--alerta);
 }
 .badge-vendido, .badge-vendida, .badge-info {
     background: var(--info-claro); color: var(--info);
 }
-.badge-rechazada, .badge-anulada, .badge-inactivo {
+.badge-rechazada, .badge-anulada, .badge-inactivo, .badge-vencida {
     background: var(--peligro-claro); color: var(--peligro);
 }
 
@@ -897,4 +897,36 @@ tbody tr:hover { background: var(--fila-hover); }
     .acceso-portada { padding: 24px 16px; }
     .acceso-portada h1 { font-size: 24px; }
     th, td { padding: 12px 14px; }
+}
+
+/* ---------------- Factura imprimible ---------------- */
+
+.impresion { background: var(--fondo); }
+.impresion-hoja {
+    max-width: 860px;
+    margin: 32px auto;
+    padding: 40px;
+    background: var(--superficie);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+}
+.impresion-acciones { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 24px; }
+.impresion-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid var(--primario);
+}
+.impresion-encabezado h1 { color: var(--primario); font-size: 28px; }
+.impresion-totales { max-width: 320px; margin-left: auto; }
+.impresion table { width: 100%; border-collapse: collapse; }
+.impresion th, .impresion td { padding: 8px 10px; border-bottom: 1px solid var(--borde); text-align: left; }
+.impresion th.texto-derecha, .impresion td.texto-derecha { text-align: right; }
+
+@media print {
+    .impresion { background: var(--blanco); }
+    .impresion-hoja { margin: 0; padding: 0; box-shadow: none; max-width: none; }
+    .impresion-acciones { display: none; }
 }

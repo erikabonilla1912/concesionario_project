@@ -211,18 +211,43 @@ const esquemas = {
     // ---------------- pagos_facturacion ----------------
     facturas: objeto({
         ...BASE,
-        numero_factura: { bsonType: 'string', pattern: '^FAC-[0-9]{5}$' },
+        numero_factura: { bsonType: 'string', pattern: '^FAC-[0-9]{5,}$' },
         fecha_emision: { bsonType: 'date' },
+        id_cotizacion: { bsonType: ENTERO.concat('null'), description: 'id de la cotización vendida' },
         cedula_cliente: { bsonType: 'string', pattern: '^[0-9]{5,20}$' },
         nombre_cliente: texto(150, 1),
         placa_vehiculo: { bsonType: 'string', pattern: PLACA },
         subtotal: { bsonType: NUMERO, minimum: 0 },
+        iva_porcentaje: { bsonType: NUMERO, minimum: 0, maximum: 50 },
         impuesto_iva: { bsonType: NUMERO, minimum: 0 },
         total: { bsonType: NUMERO, minimum: 0 },
         estado: { enum: ['emitida', 'pagada', 'anulada'] },
+        items: arreglo(objeto({
+            concepto: { enum: ['vehiculo', 'matricula', 'soat', 'accesorio', 'otro'] },
+            descripcion: texto(150),
+            cantidad: { bsonType: ENTERO, minimum: 1 },
+            valor_unitario: { bsonType: NUMERO, minimum: 0 },
+        }), 'Conceptos cobrados (ItemFactura); el primero es el vehículo'),
+        cuotas: arreglo(objeto({
+            numero: { bsonType: ENTERO, minimum: 1 },
+            fecha_vencimiento: { bsonType: 'date' },
+            valor: { bsonType: NUMERO, minimum: 0 },
+        }), 'Plan de cuotas (Cuota)'),
+        anulacion: {
+            bsonType: ['object', 'null'],
+            description: 'Quién anuló la factura y por qué (Anulacion)',
+            required: ['motivo', 'fecha', 'usuario'],
+            additionalProperties: false,
+            properties: {
+                motivo: texto(1000, 1),
+                fecha: { bsonType: 'date' },
+                usuario: texto(150, 1),
+            },
+        },
         pagos: arreglo(objeto({
             tipo_pago: { enum: ['efectivo', 'tarjeta_credito', 'tarjeta_debito', 'transferencia', 'cheque'] },
-            forma_pago: { enum: ['contado', 'cuota'] },
+            // Venta.FORMAS_PAGO ('cuota' solo por pagos antiguos)
+            forma_pago: { enum: ['contado', 'credito', 'cuota'] },
             monto: { bsonType: NUMERO, minimum: 1 },
             fecha_pago: { bsonType: 'date' },
             numero_referencia: texto(50),

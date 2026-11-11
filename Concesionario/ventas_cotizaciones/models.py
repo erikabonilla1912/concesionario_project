@@ -17,9 +17,14 @@ class VehiculoCotizacion(models.Model):
 
 
 class Venta(models.Model):
+    # Única definición de la forma de pago: la usan la venta y los pagos de la factura
+    FORMAS_PAGO = [
+        ('contado', 'Contado'),
+        ('credito', 'Crédito'),
+    ]
     fecha_venta = models.DateField(null=True, blank=True)
     precio_final = models.FloatField(null=True, blank=True)
-    forma_pago = models.CharField(max_length=50, blank=True)
+    forma_pago = models.CharField(max_length=50, blank=True, choices=FORMAS_PAGO)
     # La factura vive solo en la colección facturas (pagos_facturacion);
     # aquí se guarda únicamente su número para no repetirla.
     numero_factura = models.CharField(max_length=20, blank=True)

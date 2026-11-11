@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block titulo_pagina %}{{ titulo }}{% endblock %}
+{% block miga %}<a href="{% url 'pagos:lista_facturas' %}">Facturas</a> / <a href="{% url 'pagos:detalle_factura' factura.id %}">{{ factura.numero_factura }}</a> / Ítem{% endblock %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block subtitulo %}Factura {{ factura.numero_factura }} de {{ factura.nombre_cliente }}. El subtotal, el IVA y el total se recalculan con los ítems.{% endblock %}
+
+{% block contenido %}
+{% url 'pagos:detalle_factura' factura.id as cancelar %}
+<div class="tarjeta formulario-tarjeta">
+    <form method="post" class="tarjeta-cuerpo">
+        {% include 'parciales/formulario.html' with url_cancelar=cancelar %}
+    </form>
+</div>
+{% endblock %}

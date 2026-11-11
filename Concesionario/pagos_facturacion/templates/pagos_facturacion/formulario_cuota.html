@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block titulo_pagina %}Cuota {{ cuota.numero }}{% endblock %}
+{% block miga %}<a href="{% url 'pagos:lista_facturas' %}">Facturas</a> / <a href="{% url 'pagos:detalle_factura' factura.id %}">{{ factura.numero_factura }}</a> / Cuota {{ cuota.numero }}{% endblock %}
+{% block titulo %}Cuota {{ cuota.numero }} de {{ factura.cuotas|length }}{% endblock %}
+{% block subtitulo %}Valor ${{ cuota.valor|floatformat:0 }}. Solo se puede cambiar la fecha de vencimiento; para cambiar los valores vuelve a generar el plan.{% endblock %}
+
+{% block contenido %}
+{% url 'pagos:detalle_factura' factura.id as cancelar %}
+<div class="tarjeta formulario-tarjeta">
+    <form method="post" class="tarjeta-cuerpo">
+        {% include 'parciales/formulario.html' with url_cancelar=cancelar %}
+    </form>
+</div>
+{% endblock %}

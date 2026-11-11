@@ -9,9 +9,9 @@ from clientes_vehiculos.views import actualizar_estado_vehiculo, cotizaciones_de
 from gestion_usuarios.sesion import registrar_auditoria, requiere_permiso, vendedor_actual
 from gestion_usuarios.views import actualizar_metas
 from pagos_facturacion.models import Factura
-from .forms import (FORMAS_PAGO, FormularioCondicion, FormularioCotizacion, FormularioDescuento,
+from .forms import (FormularioCondicion, FormularioCotizacion, FormularioDescuento,
                     FormularioEditarCotizacion, FormularioPlantilla, FormularioVenta)
-from .models import Cotizacion, PlantillaCotizacion
+from .models import Cotizacion, PlantillaCotizacion, Venta
 
 
 def buscar_plantilla(id):
@@ -335,7 +335,7 @@ def detalle_cotizacion(request, id):
         'cotizacion': cotizacion,
         'factura': factura,
         'ahorro': precio_lista - (cotizacion.precio_ofertado or 0),
-        'formas_pago': dict(FORMAS_PAGO),
+        'formas_pago': dict(Venta.FORMAS_PAGO),
     })
 
 
@@ -467,7 +467,7 @@ def lista_ventas(request):
     return render(request, 'ventas_cotizaciones/lista_ventas.html', {
         'ventas': ventas,
         'forma': forma,
-        'formas_pago': FORMAS_PAGO,
+        'formas_pago': Venta.FORMAS_PAGO,
         'total': sum(v.venta['precio_final'] or 0 for v in ventas),
         'sin_factura': len([v for v in ventas if not v.venta['numero_factura']]),
     })

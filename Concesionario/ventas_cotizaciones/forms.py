@@ -2,12 +2,7 @@ from django import forms
 
 from Concesionario.formularios import CampoFecha
 from clientes_vehiculos.models import Cliente, Vehiculo
-from .models import Cotizacion, PlantillaCotizacion
-
-FORMAS_PAGO = [
-    ('contado', 'Contado'),
-    ('credito', 'Crédito'),
-]
+from .models import Cotizacion, PlantillaCotizacion, Venta
 
 
 # ---------------- Plantillas ----------------
@@ -97,4 +92,4 @@ class FormularioEditarCotizacion(forms.Form):
 class FormularioVenta(forms.Form):
     fecha_venta = CampoFecha(label='Fecha de venta')
     precio_final = forms.FloatField(label='Precio final (COP)', min_value=0)
-    forma_pago = forms.ChoiceField(label='Forma de pago', choices=FORMAS_PAGO)
+    forma_pago = forms.ChoiceField(label='Forma de pago', choices=Venta.FORMAS_PAGO)

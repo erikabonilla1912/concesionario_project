@@ -26,11 +26,11 @@
             </thead>
             <tbody>
             {% for pago in pagos %}
-                <tr class="fila-enlace" onclick="window.location='{% url 'pagos:detalle_factura' pago.factura.id %}'">
+                <tr class="fila-enlace" onclick="window.location='{% url 'pagos:detalle_pago' pago.factura.id pago.indice %}'">
                     <td class="texto-suave">{{ pago.fecha_pago|date:"d M Y" }}</td>
                     <td><span class="fuerte">{{ pago.factura.numero_factura }}</span>{% if pago.anulada %}<br>{% include 'parciales/estado.html' with valor='anulada' texto='Anulada · por devolver' %}{% endif %}</td>
                     <td>{{ pago.factura.nombre_cliente }}</td>
-                    <td>{{ pago.medio }}<br><span class="texto-suave texto-pequeno">{{ pago.forma_pago|capfirst }}</span></td>
+                    <td>{{ pago.medio }}<br><span class="texto-suave texto-pequeno">{{ pago.forma }}</span></td>
                     <td>{{ pago.numero_referencia|default:"—" }}</td>
                     <td class="texto-derecha monto">${{ pago.monto|floatformat:0 }}</td>
                 </tr>

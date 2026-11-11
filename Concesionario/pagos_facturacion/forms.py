@@ -2,8 +2,8 @@ from django import forms
 
 from Concesionario.formularios import CampoFecha
 from clientes_vehiculos.models import Cliente
-from ventas_cotizaciones.models import Cotizacion
-from .models import DetallePago
+from ventas_cotizaciones.models import Cotizacion, Venta
+from .models import DetallePago, ItemFactura
 
 
 def opciones_ventas():
@@ -31,24 +31,57 @@ class FormularioFactura(forms.Form):
 
 
 class FormularioEditarFactura(forms.Form):
-    subtotal = forms.FloatField(label='Subtotal (COP)', min_value=1)
+    """El subtotal sale de los ítems; aquí solo se cambia el IVA."""
     iva_porcentaje = forms.FloatField(label='IVA (%)', min_value=0, max_value=50)
 
-    def __init__(self, *args, pagado=0, **kwargs):
+    def __init__(self, *args, subtotal=0, pagado=0, **kwargs):
         super().__init__(*args, **kwargs)
+        self.subtotal = subtotal
         self.pagado = pagado
 
     def clean(self):
         datos = super().clean()
-        subtotal, iva = datos.get('subtotal'), datos.get('iva_porcentaje')
-        if subtotal is not None and iva is not None and subtotal * (1 + iva / 100) < self.pagado:
+        iva = datos.get('iva_porcentaje')
+        if iva is not None and self.subtotal * (1 + iva / 100) < self.pagado - 0.5:
             raise forms.ValidationError('El nuevo total no puede ser menor a lo que ya se ha pagado.')
         return datos
 
 
+class FormularioItem(forms.Form):
+    concepto = forms.ChoiceField(label='Concepto')
+    descripcion = forms.CharField(label='Descripción', max_length=150, required=False)
+    cantidad = forms.IntegerField(label='Cantidad', min_value=1, initial=1)
+    valor_unitario = forms.FloatField(label='Valor unitario (COP)', min_value=0)
+
+    def __init__(self, *args, es_vehiculo=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        if es_vehiculo:
+            # El ítem del vehículo es uno solo y su valor es el precio de la venta
+            self.fields['concepto'].choices = [c for c in ItemFactura.CONCEPTOS if c[0] == 'vehiculo']
+            self.fields['concepto'].disabled = True
+            self.fields['cantidad'].disabled = True
+            self.fields['valor_unitario'].help_text = 'Cambiarlo también actualiza el precio final de la venta.'
+        else:
+            self.fields['concepto'].choices = [c for c in ItemFactura.CONCEPTOS if c[0] != 'vehiculo']
+
+
+class FormularioPlanCuotas(forms.Form):
+    numero_cuotas = forms.IntegerField(label='Número de cuotas', min_value=2, max_value=72, initial=12)
+    fecha_primera = CampoFecha(label='Vencimiento de la primera cuota')
+
+
+class FormularioCuota(forms.Form):
+    fecha_vencimiento = CampoFecha(label='Fecha de vencimiento')
+
+
+class FormularioAnulacion(forms.Form):
+    motivo = forms.CharField(label='Motivo de la anulación', min_length=5, max_length=1000,
+                             widget=forms.Textarea(attrs={'rows': 3}))
+
+
 class FormularioPago(forms.Form):
     tipo_pago = forms.ChoiceField(label='Medio de pago', choices=DetallePago.TIPOS_PAGO)
-    forma_pago = forms.ChoiceField(label='Forma', choices=DetallePago.FORMA_PAGO)
+    forma_pago = forms.ChoiceField(label='Forma', choices=Venta.FORMAS_PAGO)
     monto = forms.FloatField(label='Monto (COP)', min_value=1)
     fecha_pago = CampoFecha(label='Fecha del pago')
     numero_referencia = forms.CharField(label='Número de referencia', max_length=50, required=False)

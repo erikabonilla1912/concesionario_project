@@ -10,14 +10,16 @@
         {% include 'parciales/icono.html' with nombre='pago' %} Registrar pago
     </a>
     {% endif %}
+    <a class="boton boton-secundario" href="{% url 'pagos:imprimir_factura' factura.id %}" target="_blank">
+        {% include 'parciales/icono.html' with nombre='factura' %} Imprimir
+    </a>
     {% if factura.estado != 'anulada' %}
     <a class="boton boton-secundario" href="{% url 'pagos:editar_factura' factura.id %}">
-        {% include 'parciales/icono.html' with nombre='editar' %} Editar
+        {% include 'parciales/icono.html' with nombre='editar' %} Editar IVA
     </a>
-    <form method="post" action="{% url 'pagos:anular_factura' factura.id %}" onsubmit="return confirm('¿Anular la factura {{ factura.numero_factura }}? La venta quedará libre para volver a facturarse.{% if pagos %} Los pagos recibidos (${{ pagado|floatformat:0 }}) quedarán como dinero por devolver al cliente.{% endif %}')">
-        {% csrf_token %}
-        <button class="boton boton-secundario" type="submit">{% include 'parciales/icono.html' with nombre='x' %} Anular</button>
-    </form>
+    <a class="boton boton-secundario" href="{% url 'pagos:anular_factura' factura.id %}">
+        {% include 'parciales/icono.html' with nombre='x' %} Anular
+    </a>
     {% endif %}
     <a class="boton boton-suave-peligro" href="{% url 'pagos:eliminar_factura' factura.id %}">
         {% include 'parciales/icono.html' with nombre='eliminar' %} Eliminar
@@ -25,43 +27,116 @@
 {% endblock %}
 
 {% block contenido %}
+{% with permisos=request.session.usuario.permisos %}
 <div class="rejilla rejilla-lateral">
-    <div class="tarjeta">
-        <div class="tarjeta-titulo">
-            <h2>Pagos recibidos</h2>
-            <span class="monto">${{ pagado|floatformat:0 }}</span>
+    <div class="rejilla">
+        {% if factura.anulacion %}
+        <div class="alerta alerta-error">
+            <strong>Factura anulada</strong> el {{ factura.anulacion.fecha|date:"d M Y H:i" }} por {{ factura.anulacion.usuario }}.<br>
+            Motivo: {{ factura.anulacion.motivo }}
         </div>
-        {% if pagos %}
-        <div class="tabla-contenedor">
-            <table>
-                <thead><tr><th>Fecha</th><th>Medio</th><th>Referencia</th><th class="texto-derecha">Monto</th><th></th></tr></thead>
-                <tbody>
-                {% for pago in pagos %}
-                    <tr>
-                        <td class="texto-suave">{{ pago.fecha_pago|date:"d M Y" }}</td>
-                        <td><span class="fuerte">{{ pago.medio }}</span><br>
-                            <span class="texto-suave texto-pequeno">{{ pago.forma_pago|capfirst }}{% if pago.observaciones %} · {{ pago.observaciones }}{% endif %}</span></td>
-                        <td>{{ pago.numero_referencia|default:"—" }}</td>
-                        <td class="texto-derecha monto">${{ pago.monto|floatformat:0 }}</td>
-                        <td class="texto-derecha">
-                            {% if factura.estado != 'anulada' %}
-                            <div class="acciones" style="justify-content: flex-end">
-                                <a class="boton-icono" href="{% url 'pagos:editar_pago' factura.id pago.indice %}" title="Editar">{% include 'parciales/icono.html' with nombre='editar' %}</a>
-                                <form method="post" action="{% url 'pagos:eliminar_pago' factura.id pago.indice %}" onsubmit="return confirm('¿Eliminar este pago?')">
-                                    {% csrf_token %}
-                                    <button class="boton-icono" type="submit" title="Eliminar">{% include 'parciales/icono.html' with nombre='eliminar' %}</button>
-                                </form>
-                            </div>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-            {% include 'parciales/vacio.html' with icono='pago' titulo='Sin pagos' mensaje='Registra el primer pago de esta factura.' %}
         {% endif %}
+
+        <div class="tarjeta">
+            <div class="tarjeta-titulo">
+                <h2>Ítems</h2>
+                {% if editable %}<a href="{% url 'pagos:agregar_item' factura.id %}">+ Agregar ítem</a>{% endif %}
+            </div>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead><tr><th>Concepto</th><th>Descripción</th><th class="texto-derecha">Cant.</th><th class="texto-derecha">Valor unitario</th><th class="texto-derecha">Valor</th><th></th></tr></thead>
+                    <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td class="fuerte">{{ item.nombre }}</td>
+                            <td class="texto-suave">{{ item.descripcion|default:"—" }}</td>
+                            <td class="texto-derecha">{{ item.cantidad }}</td>
+                            <td class="texto-derecha">${{ item.valor_unitario|floatformat:0 }}</td>
+                            <td class="texto-derecha monto">${{ item.valor|floatformat:0 }}</td>
+                            <td class="texto-derecha">
+                                {% if editable %}
+                                <a class="boton-icono" href="{% url 'pagos:editar_item' factura.id item.indice %}" title="Editar">{% include 'parciales/icono.html' with nombre='editar' %}</a>
+                                {% if item.concepto != 'vehiculo' %}<a class="boton-icono" href="{% url 'pagos:eliminar_item' factura.id item.indice %}" title="Quitar">{% include 'parciales/icono.html' with nombre='eliminar' %}</a>{% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tarjeta">
+            <div class="tarjeta-titulo">
+                <h2>Pagos recibidos</h2>
+                <span class="monto">${{ pagado|floatformat:0 }}</span>
+            </div>
+            {% if pagos %}
+            <div class="tabla-contenedor">
+                <table>
+                    <thead><tr><th>Fecha</th><th>Medio</th><th>Referencia</th><th class="texto-derecha">Monto</th><th></th></tr></thead>
+                    <tbody>
+                    {% for pago in pagos %}
+                        <tr>
+                            <td class="texto-suave">{{ pago.fecha_pago|date:"d M Y" }}</td>
+                            <td><span class="fuerte">{{ pago.medio }}</span><br>
+                                <span class="texto-suave texto-pequeno">{{ pago.forma }}{% if pago.observaciones %} · {{ pago.observaciones }}{% endif %}</span></td>
+                            <td>{{ pago.numero_referencia|default:"—" }}</td>
+                            <td class="texto-derecha monto">${{ pago.monto|floatformat:0 }}</td>
+                            <td class="texto-derecha">
+                                <a class="boton-icono" href="{% url 'pagos:detalle_pago' factura.id pago.indice %}" title="Ver">{% include 'parciales/icono.html' with nombre='pago' %}</a>
+                                {% if editable %}
+                                <a class="boton-icono" href="{% url 'pagos:editar_pago' factura.id pago.indice %}" title="Editar">{% include 'parciales/icono.html' with nombre='editar' %}</a>
+                                <a class="boton-icono" href="{% url 'pagos:eliminar_pago' factura.id pago.indice %}" title="Eliminar">{% include 'parciales/icono.html' with nombre='eliminar' %}</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                {% include 'parciales/vacio.html' with icono='pago' titulo='Sin pagos' mensaje='Registra el primer pago de esta factura.' %}
+            {% endif %}
+        </div>
+
+        <div class="tarjeta">
+            <div class="tarjeta-titulo">
+                <h2>Plan de cuotas</h2>
+                {% if factura.estado == 'emitida' %}
+                <span>
+                    <a href="{% url 'pagos:generar_cuotas' factura.id %}">{% if cuotas %}Regenerar{% else %}+ Generar plan{% endif %}</a>
+                    {% if cuotas %} · <a href="{% url 'pagos:eliminar_cuotas' factura.id %}">Eliminar plan</a>{% endif %}
+                </span>
+                {% endif %}
+            </div>
+            {% if plan_descuadrado %}
+                <div class="alerta alerta-aviso">El total de la factura cambió y las cuotas ya no suman lo mismo. Vuelve a generar el plan.</div>
+            {% endif %}
+            {% if cuotas %}
+            <div class="tabla-contenedor">
+                <table>
+                    <thead><tr><th>Cuota</th><th>Vencimiento</th><th>Estado</th><th class="texto-derecha">Abonado</th><th class="texto-derecha">Valor</th><th></th></tr></thead>
+                    <tbody>
+                    {% for cuota in cuotas %}
+                        <tr>
+                            <td class="fuerte">{{ cuota.numero }}</td>
+                            <td class="texto-suave">{{ cuota.fecha_vencimiento|date:"d M Y" }}</td>
+                            <td>{% include 'parciales/estado.html' with valor=cuota.estado texto=cuota.texto_estado %}</td>
+                            <td class="texto-derecha">${{ cuota.abonado|floatformat:0 }}</td>
+                            <td class="texto-derecha monto">${{ cuota.valor|floatformat:0 }}</td>
+                            <td class="texto-derecha">
+                                {% if editable %}<a class="boton-icono" href="{% url 'pagos:editar_cuota' factura.id cuota.indice %}" title="Cambiar fecha">{% include 'parciales/icono.html' with nombre='editar' %}</a>{% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                {% include 'parciales/vacio.html' with icono='factura' titulo='Sin plan de cuotas' mensaje='Si la venta es a crédito, genera aquí las cuotas mensuales.' %}
+            {% endif %}
+        </div>
     </div>
 
     <div class="tarjeta">
@@ -81,16 +156,21 @@
                 <div class="resumen-total"><span class="fuerte">Saldo</span><span class="fuerte">${{ saldo|floatformat:0 }}</span></div>
             </div>
             {% else %}
-            <div class="alerta alerta-aviso separado">Factura anulada. La venta puede volver a facturarse.{% if pagado %} Hay ${{ pagado|floatformat:0 }} en pagos recibidos por devolver al cliente.{% endif %}</div>
+            <div class="alerta alerta-aviso separado">La venta puede volver a facturarse.{% if pagado %} Hay ${{ pagado|floatformat:0 }} en pagos recibidos por devolver al cliente.{% endif %}</div>
             {% endif %}
 
             <div class="datos separado">
-                <div class="dato"><small>Cliente</small><span>{{ factura.nombre_cliente }}</span></div>
+                <div class="dato"><small>Cliente</small><span>{% if cliente and permisos.clientes %}<a href="{% url 'clientes:detalle_cliente' cliente.id %}">{{ factura.nombre_cliente }}</a>{% else %}{{ factura.nombre_cliente }}{% endif %}</span></div>
                 <div class="dato"><small>Cédula</small><span>{{ factura.cedula_cliente }}</span></div>
-                <div class="dato"><small>Placa</small><span>{{ factura.placa_vehiculo }}</span></div>
+                <div class="dato"><small>Vehículo</small><span>{% if vehiculo and permisos.clientes %}<a href="{% url 'clientes:detalle_vehiculo' vehiculo.id %}">{{ factura.placa_vehiculo }}</a>{% else %}{{ factura.placa_vehiculo }}{% endif %}</span></div>
                 <div class="dato"><small>Emisión</small><span>{{ factura.fecha_emision|date:"d M Y" }}</span></div>
+                {% if cotizacion %}
+                <div class="dato"><small>Venta</small><span>{% if permisos.ventas %}<a href="{% url 'ventas:detalle_cotizacion' cotizacion.id %}">Cotización #{{ cotizacion.id }}</a>{% else %}Cotización #{{ cotizacion.id }}{% endif %}</span></div>
+                <div class="dato"><small>Forma de pago</small><span>{{ cotizacion.venta.forma_pago|capfirst }}</span></div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% endwith %}
 {% endblock %}
