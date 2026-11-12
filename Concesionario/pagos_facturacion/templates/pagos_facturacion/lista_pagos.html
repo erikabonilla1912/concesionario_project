@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block titulo_pagina %}Pagos recibidos{% endblock %}
-{% block miga %}Pagos y facturación{% endblock %}
+{% block miga %}Pagos y facturacion{% endblock %}
 {% block titulo %}Pagos recibidos{% endblock %}
 {% block subtitulo %}Total recaudado en facturas vigentes: ${{ total|floatformat:0 }}{% if por_devolver %} · Pagos de facturas anuladas (por devolver): ${{ por_devolver|floatformat:0 }}{% endif %}{% endblock %}
 

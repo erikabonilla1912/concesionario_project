@@ -29,7 +29,7 @@
             </div>
             <div class="dato separado"><small>Observaciones</small><span>{{ pago.observaciones|default:"Sin observaciones" }}</span></div>
             {% if factura.estado == 'anulada' %}
-            <div class="alerta alerta-aviso separado">La factura está anulada: este pago es dinero por devolver al cliente.</div>
+            <div class="alerta alerta-aviso separado">La factura esta anulada: este pago es dinero por devolver al cliente.</div>
             {% endif %}
         </div>
     </div>
@@ -42,7 +42,7 @@
             </div>
             <div class="resumen-total"><span>Total factura</span><span>${{ factura.total|floatformat:0 }}</span></div>
             <div class="resumen-total"><span>Pagado hasta este pago</span><span>${{ acumulado|floatformat:0 }}</span></div>
-            <div class="resumen-total final"><span>Saldo después de este pago</span><span>${{ saldo_despues|floatformat:0 }}</span></div>
+            <div class="resumen-total final"><span>Saldo despues de este pago</span><span>${{ saldo_despues|floatformat:0 }}</span></div>
             <div class="separado"><a class="boton boton-secundario" href="{% url 'pagos:detalle_factura' factura.id %}">Ver factura</a></div>
         </div>
     </div>

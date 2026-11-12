@@ -3,7 +3,7 @@
 {% block titulo_pagina %}{{ titulo }}{% endblock %}
 {% block miga %}<a href="{% url 'pagos:lista_facturas' %}">Facturas</a> / Formulario{% endblock %}
 {% block titulo %}{{ titulo }}{% endblock %}
-{% block subtitulo %}{% if factura %}El subtotal sale de los ítems de la factura (${{ factura.subtotal|floatformat:0 }}); aquí solo cambias el porcentaje de IVA.{% else %}Solo aparecen las ventas que todavía no tienen factura. El cliente, la placa y el subtotal se toman de la venta.{% endif %}{% endblock %}
+{% block subtitulo %}{% if factura %}El subtotal sale de los items de la factura (${{ factura.subtotal|floatformat:0 }}); aqui solo cambias el porcentaje de IVA.{% else %}Solo aparecen las ventas que todavia no tienen factura. El cliente, la placa y el subtotal se toman de la venta.{% endif %}{% endblock %}
 
 {% block contenido %}
 {% if factura %}{% url 'pagos:detalle_factura' factura.id as cancelar %}{% else %}{% url 'pagos:lista_facturas' as cancelar %}{% endif %}

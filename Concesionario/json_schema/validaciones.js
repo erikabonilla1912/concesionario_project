@@ -213,7 +213,7 @@ const esquemas = {
         ...BASE,
         numero_factura: { bsonType: 'string', pattern: '^FAC-[0-9]{5,}$' },
         fecha_emision: { bsonType: 'date' },
-        id_cotizacion: { bsonType: ENTERO.concat('null'), description: 'id de la cotización vendida' },
+        id_cotizacion: { bsonType: ENTERO.concat('null'), description: 'id de la cotizacion vendida' },
         cedula_cliente: { bsonType: 'string', pattern: '^[0-9]{5,20}$' },
         nombre_cliente: texto(150, 1),
         placa_vehiculo: { bsonType: 'string', pattern: PLACA },
@@ -227,7 +227,7 @@ const esquemas = {
             descripcion: texto(150),
             cantidad: { bsonType: ENTERO, minimum: 1 },
             valor_unitario: { bsonType: NUMERO, minimum: 0 },
-        }), 'Conceptos cobrados (ItemFactura); el primero es el vehículo'),
+        }), 'Conceptos cobrados (ItemFactura); el primero es el vehiculo'),
         cuotas: arreglo(objeto({
             numero: { bsonType: ENTERO, minimum: 1 },
             fecha_vencimiento: { bsonType: 'date' },
@@ -235,7 +235,7 @@ const esquemas = {
         }), 'Plan de cuotas (Cuota)'),
         anulacion: {
             bsonType: ['object', 'null'],
-            description: 'Quién anuló la factura y por qué (Anulacion)',
+            description: 'Quien anulo la factura y por que (Anulacion)',
             required: ['motivo', 'fecha', 'usuario'],
             additionalProperties: false,
             properties: {
@@ -246,14 +246,13 @@ const esquemas = {
         },
         pagos: arreglo(objeto({
             tipo_pago: { enum: ['efectivo', 'tarjeta_credito', 'tarjeta_debito', 'transferencia', 'cheque'] },
-            // Venta.FORMAS_PAGO ('cuota' solo por pagos antiguos)
             forma_pago: { enum: ['contado', 'credito', 'cuota'] },
             monto: { bsonType: NUMERO, minimum: 1 },
             fecha_pago: { bsonType: 'date' },
             numero_referencia: texto(50),
             observaciones: { bsonType: 'string' },
         }), 'Pagos recibidos'),
-    }, null, 'Factura de una venta (única colección de facturas)'),
+    }, null, 'Factura de una venta (unica coleccion de facturas)'),
 };
 
 // ---------- Aplicar los esquemas ----------

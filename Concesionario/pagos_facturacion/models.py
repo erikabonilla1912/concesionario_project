@@ -1,14 +1,14 @@
 from djongo import models
 
-# La forma de pago se define una sola vez en la venta (ventas_cotizaciones)
 from ventas_cotizaciones.models import Venta
 
 
 class DetallePago(models.Model):
+
     TIPOS_PAGO = [
         ('efectivo', 'Efectivo'),
-        ('tarjeta_credito', 'Tarjeta de Crédito'),
-        ('tarjeta_debito', 'Tarjeta de Débito'),
+        ('tarjeta_credito', 'Tarjeta de Credito'),
+        ('tarjeta_debito', 'Tarjeta de Debito'),
         ('transferencia', 'Transferencia Bancaria'),
         ('cheque', 'Cheque'),
     ]
@@ -25,10 +25,9 @@ class DetallePago(models.Model):
 
 
 class ItemFactura(models.Model):
-    """Concepto cobrado en la factura. El primero siempre es el vehículo vendido."""
     CONCEPTOS = [
-        ('vehiculo', 'Vehículo'),
-        ('matricula', 'Matrícula y traspaso'),
+        ('vehiculo', 'Vehiculo'),
+        ('matricula', 'Matricula y traspaso'),
         ('soat', 'SOAT'),
         ('accesorio', 'Accesorio'),
         ('otro', 'Otro'),
@@ -43,7 +42,6 @@ class ItemFactura(models.Model):
 
 
 class Cuota(models.Model):
-    """Cuota del plan de pagos de una factura a crédito."""
     numero = models.IntegerField()
     fecha_vencimiento = models.DateField()
     valor = models.FloatField()
@@ -53,7 +51,6 @@ class Cuota(models.Model):
 
 
 class Anulacion(models.Model):
-    """Quién anuló la factura, cuándo y por qué."""
     motivo = models.TextField()
     fecha = models.DateTimeField()
     usuario = models.CharField(max_length=150)

@@ -899,7 +899,6 @@ tbody tr:hover { background: var(--fila-hover); }
     th, td { padding: 12px 14px; }
 }
 
-/* ---------------- Factura imprimible ---------------- */
 
 .impresion { background: var(--fondo); }
 .impresion-hoja {

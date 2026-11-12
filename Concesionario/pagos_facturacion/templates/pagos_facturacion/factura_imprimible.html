@@ -29,8 +29,8 @@
 
     <div class="datos separado">
         <div class="dato"><small>Cliente</small><span>{{ factura.nombre_cliente }}</span></div>
-        <div class="dato"><small>Cédula</small><span>{{ factura.cedula_cliente }}</span></div>
-        <div class="dato"><small>Vehículo</small><span>{{ factura.placa_vehiculo }}</span></div>
+        <div class="dato"><small>Cedula</small><span>{{ factura.cedula_cliente }}</span></div>
+        <div class="dato"><small>Vehiculo</small><span>{{ factura.placa_vehiculo }}</span></div>
     </div>
 
     {% if factura.anulacion %}
@@ -38,7 +38,7 @@
     {% endif %}
 
     <table class="separado">
-        <thead><tr><th>Concepto</th><th>Descripción</th><th class="texto-derecha">Cant.</th><th class="texto-derecha">Valor unitario</th><th class="texto-derecha">Valor</th></tr></thead>
+        <thead><tr><th>Concepto</th><th>Descripcion</th><th class="texto-derecha">Cant.</th><th class="texto-derecha">Valor unitario</th><th class="texto-derecha">Valor</th></tr></thead>
         <tbody>
         {% for item in items %}
             <tr>

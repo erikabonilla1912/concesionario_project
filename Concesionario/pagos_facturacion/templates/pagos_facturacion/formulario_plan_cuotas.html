@@ -9,7 +9,7 @@
 {% url 'pagos:detalle_factura' factura.id as cancelar %}
 <div class="tarjeta formulario-tarjeta">
     <form method="post" class="tarjeta-cuerpo">
-        {% if factura.cuotas %}<div class="alerta alerta-aviso">La factura ya tiene un plan de {{ factura.cuotas|length }} cuotas; se reemplazará por el nuevo.</div>{% endif %}
+        {% if factura.cuotas %}<div class="alerta alerta-aviso">La factura ya tiene un plan de {{ factura.cuotas|length }} cuotas; se reemplazara por el nuevo.</div>{% endif %}
         {% include 'parciales/formulario.html' with url_cancelar=cancelar texto_boton='Generar plan' %}
     </form>
 </div>

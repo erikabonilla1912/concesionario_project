@@ -3,7 +3,7 @@
 {% block titulo_pagina %}Factura {{ factura.numero_factura }}{% endblock %}
 {% block miga %}<a href="{% url 'pagos:lista_facturas' %}">Facturas</a> / Detalle{% endblock %}
 {% block titulo %}Factura {{ factura.numero_factura }}{% endblock %}
-{% block subtitulo %}{{ factura.nombre_cliente }} · Vehículo {{ factura.placa_vehiculo }} · Emitida el {{ factura.fecha_emision|date:"d M Y" }}{% endblock %}
+{% block subtitulo %}{{ factura.nombre_cliente }} · Vehiculo {{ factura.placa_vehiculo }} · Emitida el {{ factura.fecha_emision|date:"d M Y" }}{% endblock %}
 {% block acciones %}
     {% if factura.estado == 'emitida' %}
     <a class="boton boton-primario" href="{% url 'pagos:registrar_pago' factura.id %}">
@@ -39,12 +39,12 @@
 
         <div class="tarjeta">
             <div class="tarjeta-titulo">
-                <h2>Ítems</h2>
-                {% if editable %}<a href="{% url 'pagos:agregar_item' factura.id %}">+ Agregar ítem</a>{% endif %}
+                <h2>Items</h2>
+                {% if editable %}<a href="{% url 'pagos:agregar_item' factura.id %}">+ Agregar item</a>{% endif %}
             </div>
             <div class="tabla-contenedor">
                 <table>
-                    <thead><tr><th>Concepto</th><th>Descripción</th><th class="texto-derecha">Cant.</th><th class="texto-derecha">Valor unitario</th><th class="texto-derecha">Valor</th><th></th></tr></thead>
+                    <thead><tr><th>Concepto</th><th>Descripcion</th><th class="texto-derecha">Cant.</th><th class="texto-derecha">Valor unitario</th><th class="texto-derecha">Valor</th><th></th></tr></thead>
                     <tbody>
                     {% for item in items %}
                         <tr>
@@ -111,7 +111,7 @@
                 {% endif %}
             </div>
             {% if plan_descuadrado %}
-                <div class="alerta alerta-aviso">El total de la factura cambió y las cuotas ya no suman lo mismo. Vuelve a generar el plan.</div>
+                <div class="alerta alerta-aviso">El total de la factura cambio y las cuotas ya no suman lo mismo. Vuelve a generar el plan.</div>
             {% endif %}
             {% if cuotas %}
             <div class="tabla-contenedor">
@@ -134,7 +134,7 @@
                 </table>
             </div>
             {% else %}
-                {% include 'parciales/vacio.html' with icono='factura' titulo='Sin plan de cuotas' mensaje='Si la venta es a crédito, genera aquí las cuotas mensuales.' %}
+                {% include 'parciales/vacio.html' with icono='factura' titulo='Sin plan de cuotas' mensaje='Si la venta es a credito, genera aqui las cuotas mensuales.' %}
             {% endif %}
         </div>
     </div>
@@ -161,12 +161,12 @@
 
             <div class="datos separado">
                 <div class="dato"><small>Cliente</small><span>{% if cliente and permisos.clientes %}<a href="{% url 'clientes:detalle_cliente' cliente.id %}">{{ factura.nombre_cliente }}</a>{% else %}{{ factura.nombre_cliente }}{% endif %}</span></div>
-                <div class="dato"><small>Cédula</small><span>{{ factura.cedula_cliente }}</span></div>
-                <div class="dato"><small>Vehículo</small><span>{% if vehiculo and permisos.clientes %}<a href="{% url 'clientes:detalle_vehiculo' vehiculo.id %}">{{ factura.placa_vehiculo }}</a>{% else %}{{ factura.placa_vehiculo }}{% endif %}</span></div>
-                <div class="dato"><small>Emisión</small><span>{{ factura.fecha_emision|date:"d M Y" }}</span></div>
+                <div class="dato"><small>Cedula</small><span>{{ factura.cedula_cliente }}</span></div>
+                <div class="dato"><small>Vehiculo</small><span>{% if vehiculo and permisos.clientes %}<a href="{% url 'clientes:detalle_vehiculo' vehiculo.id %}">{{ factura.placa_vehiculo }}</a>{% else %}{{ factura.placa_vehiculo }}{% endif %}</span></div>
+                <div class="dato"><small>Emision</small><span>{{ factura.fecha_emision|date:"d M Y" }}</span></div>
                 {% if cotizacion %}
-                <div class="dato"><small>Venta</small><span>{% if permisos.ventas %}<a href="{% url 'ventas:detalle_cotizacion' cotizacion.id %}">Cotización #{{ cotizacion.id }}</a>{% else %}Cotización #{{ cotizacion.id }}{% endif %}</span></div>
-                <div class="dato"><small>Forma de pago</small><span>{{ cotizacion.venta.forma_pago|capfirst }}</span></div>
+                <div class="dato"><small>Venta</small><span>{% if permisos.ventas %}<a href="{% url 'ventas:detalle_cotizacion' cotizacion.id %}">Cotizacion #{{ cotizacion.id }}</a>{% else %}Cotizacion #{{ cotizacion.id }}{% endif %}</span></div>
+                {% if forma_venta %}<div class="dato"><small>Forma de pago</small><span>{{ forma_venta }}</span></div>{% endif %}
                 {% endif %}
             </div>
         </div>

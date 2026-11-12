@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block titulo_pagina %}Facturas{% endblock %}
-{% block miga %}Pagos y facturación{% endblock %}
+{% block miga %}Pagos y facturacion{% endblock %}
 {% block titulo %}Facturas{% endblock %}
 {% block subtitulo %}{{ total }} factura{{ total|pluralize }}. Cada venta se factura una sola vez y los pagos se guardan dentro de la factura.{% endblock %}
 {% block acciones %}
@@ -13,7 +13,7 @@
 {% block contenido %}
 <div class="tarjeta">
     <form class="filtros" method="get">
-        <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por número, cliente, cédula o placa…">
+        <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por numero, cliente, cedula o placa…">
         <select name="estado">
             <option value="">Todos los estados</option>
             {% for valor, texto in estados %}
@@ -28,7 +28,7 @@
     <div class="tabla-contenedor">
         <table>
             <thead>
-                <tr><th>Factura</th><th>Cliente</th><th>Vehículo</th><th>Estado</th><th class="texto-derecha">Total</th><th class="texto-derecha">Saldo</th></tr>
+                <tr><th>Factura</th><th>Cliente</th><th>Vehiculo</th><th>Estado</th><th class="texto-derecha">Total</th><th class="texto-derecha">Saldo</th></tr>
             </thead>
             <tbody>
             {% for fila in filas %}

@@ -1,5 +1,6 @@
 import calendar
 import datetime
+import unicodedata
 
 from django.db import connection
 from django.db.models import Q
@@ -12,10 +13,6 @@ from .forms import (FormularioAnulacion, FormularioCuota, FormularioEditarFactur
                     FormularioItem, FormularioPago, FormularioPlanCuotas)
 from .models import DetallePago, Factura, ItemFactura
 
-
-# =====================================================================
-# Utilidades
-# =====================================================================
 
 def buscar_factura(id):
     try:
@@ -37,7 +34,6 @@ def saldo(factura):
 
 
 def actualizar_estado(factura):
-    """Una factura sin saldo (incluida una de total $0) queda pagada."""
     if factura.estado != 'anulada':
         factura.estado = 'pagada' if saldo(factura) < 1 else 'emitida'
 
@@ -55,18 +51,16 @@ def valor_item(item):
 
 
 def asegurar_items(factura):
-    """Facturas antiguas sin ítems: el subtotal completo pasa a ser el ítem del vehículo."""
     if not factura.items:
         factura.items = [{
             'concepto': 'vehiculo',
-            'descripcion': f'Vehículo {factura.placa_vehiculo}',
+            'descripcion': f'Vehiculo {factura.placa_vehiculo}',
             'cantidad': 1,
             'valor_unitario': factura.subtotal,
         }]
 
 
 def recalcular(factura):
-    """Subtotal = suma de los ítems; IVA y total a partir de él."""
     asegurar_items(factura)
     factura.iva_porcentaje = porcentaje_iva(factura)
     factura.subtotal = sum(valor_item(i) for i in factura.items)
@@ -76,9 +70,6 @@ def recalcular(factura):
 
 
 def siguiente_numero():
-    """Consecutivo que nunca se repite, aunque se eliminen facturas.
-    Usa el mayor entre los números existentes y el contador de ids de djongo
-    (ese contador solo aumenta, incluso cuando se borra una factura)."""
     numeros = [int(f.numero_factura.split('-')[1]) for f in Factura.objects.all()]
     connection.ensure_connection()
     esquema = connection.connection['__schema__'].find_one({'name': Factura._meta.db_table}) or {}
@@ -87,7 +78,6 @@ def siguiente_numero():
 
 
 def cotizacion_de_factura(factura):
-    """Cotización cuya venta tiene el número de esta factura (o None)."""
     if factura.id_cotizacion:
         cotizacion = Cotizacion.objects.filter(id=factura.id_cotizacion).first()
         if cotizacion and cotizacion.venta and cotizacion.venta['numero_factura'] == factura.numero_factura:
@@ -100,7 +90,6 @@ def cotizacion_de_factura(factura):
 
 
 def asignar_numero_a_venta(factura, numero):
-    """Guarda (o borra) el número de factura dentro de la venta de la cotización."""
     cotizacion = cotizacion_de_factura(factura)
     if cotizacion:
         cotizacion.venta['numero_factura'] = numero
@@ -108,7 +97,6 @@ def asignar_numero_a_venta(factura, numero):
 
 
 def sincronizar_venta(factura):
-    """El precio final de la venta es el valor del ítem del vehículo."""
     vehiculo = next((i for i in factura.items if i['concepto'] == 'vehiculo'), None)
     cotizacion = cotizacion_de_factura(factura)
     if vehiculo and cotizacion and cotizacion.venta['precio_final'] != valor_item(vehiculo):
@@ -124,7 +112,6 @@ def sumar_meses(fecha, meses):
 
 
 def estado_cuotas(factura):
-    """Aplica lo pagado a las cuotas en orden y calcula el estado de cada una."""
     hoy = datetime.date.today()
     disponible = total_pagado(factura)
     cuotas = []
@@ -147,12 +134,15 @@ def nombre_concepto(concepto):
     return dict(ItemFactura.CONCEPTOS).get(concepto, concepto)
 
 
+def sin_tildes(texto):
+    return unicodedata.normalize('NFKD', texto).encode('ascii', 'ignore').decode('ascii')
+
+
 def nombre_forma(forma):
-    return dict(Venta.FORMAS_PAGO).get(forma, forma.capitalize())
+    return sin_tildes(dict(Venta.FORMAS_PAGO).get(forma, forma.capitalize()))
 
 
 def contexto_factura(factura):
-    """Datos que comparten el detalle y la versión imprimible."""
     asegurar_items(factura)
     pagado = total_pagado(factura)
     medios = dict(DetallePago.TIPOS_PAGO)
@@ -172,10 +162,6 @@ def contexto_factura(factura):
         'editable': factura.estado != 'anulada',
     }
 
-
-# =====================================================================
-# Facturas
-# =====================================================================
 
 @requiere_permiso('pagos')
 def lista_facturas(request):
@@ -238,7 +224,7 @@ def crear_factura(request):
                 factura.save()
             cotizacion.venta['numero_factura'] = factura.numero_factura
             cotizacion.save()
-            registrar_auditoria(request, 'crear', 'pagos', f'Generó la factura {factura.numero_factura}')
+            registrar_auditoria(request, 'crear', 'pagos', f'Genero la factura {factura.numero_factura}')
             return redirect('pagos:detalle_factura', id=factura.id)
     else:
         formulario = FormularioFactura(initial={'venta': request.GET.get('venta', '')})
@@ -255,11 +241,17 @@ def detalle_factura(request, id):
     if factura is None:
         return redirect('pagos:lista_facturas')
 
+    cotizacion = cotizacion_de_factura(factura)
+    if cotizacion is None and factura.id_cotizacion:
+        cotizacion = Cotizacion.objects.filter(id=factura.id_cotizacion).first()
+
     contexto = contexto_factura(factura)
     contexto.update({
         'cliente': Cliente.objects.filter(cedula=factura.cedula_cliente).first(),
         'vehiculo': Vehiculo.objects.filter(placa=factura.placa_vehiculo).first(),
-        'cotizacion': cotizacion_de_factura(factura),
+        'cotizacion': cotizacion,
+        'forma_venta': nombre_forma(cotizacion.venta['forma_pago'])
+                       if cotizacion and cotizacion.venta and cotizacion.venta['forma_pago'] else '',
     })
     return render(request, 'pagos_facturacion/detalle_factura.html', contexto)
 
@@ -287,7 +279,7 @@ def editar_factura(request, id):
             factura.iva_porcentaje = formulario.cleaned_data['iva_porcentaje']
             recalcular(factura)
             factura.save()
-            registrar_auditoria(request, 'editar', 'pagos', f'Editó la factura {factura.numero_factura}')
+            registrar_auditoria(request, 'editar', 'pagos', f'Edito la factura {factura.numero_factura}')
             return redirect('pagos:detalle_factura', id=factura.id)
     else:
         formulario = FormularioEditarFactura(subtotal=subtotal, pagado=pagado, initial={
@@ -312,7 +304,6 @@ def anular_factura(request, id):
     if request.method == 'POST':
         formulario = FormularioAnulacion(request.POST)
         if formulario.is_valid():
-            # La venta queda libre para volver a facturarse
             asignar_numero_a_venta(factura, '')
             factura.estado = 'anulada'
             factura.anulacion = {
@@ -321,7 +312,7 @@ def anular_factura(request, id):
                 'usuario': request.session['usuario']['nombre_usuario'],
             }
             factura.save()
-            registrar_auditoria(request, 'editar', 'pagos', f'Anuló la factura {factura.numero_factura}')
+            registrar_auditoria(request, 'editar', 'pagos', f'Anulo la factura {factura.numero_factura}')
             return redirect('pagos:detalle_factura', id=id)
     else:
         formulario = FormularioAnulacion()
@@ -343,7 +334,7 @@ def eliminar_factura(request, id):
     if request.method == 'POST' and not con_pagos:
         asignar_numero_a_venta(factura, '')
         factura.delete()
-        registrar_auditoria(request, 'eliminar', 'pagos', f'Eliminó la factura {factura.numero_factura}')
+        registrar_auditoria(request, 'eliminar', 'pagos', f'Elimino la factura {factura.numero_factura}')
         return redirect('pagos:lista_facturas')
 
     return render(request, 'confirmar_eliminar.html', {
@@ -351,25 +342,20 @@ def eliminar_factura(request, id):
         'objeto': f'la factura {factura.numero_factura} de {factura.nombre_cliente}',
         'bloqueado': con_pagos,
         'motivo': 'La factura tiene pagos registrados. Puedes anularla en lugar de eliminarla.',
-        'advertencia': 'La venta quedará sin factura y se podrá volver a facturar.',
+        'advertencia': 'La venta quedara sin factura y se podra volver a facturar.',
         'url_cancelar': 'pagos:detalle_factura',
         'id_cancelar': factura.id,
     })
 
 
-# =====================================================================
-# Ítems de la factura
-# =====================================================================
-
 def guardar_items(request, factura, formulario, accion):
-    """Recalcula la factura; si el total queda por debajo de lo pagado, no guarda."""
     recalcular(factura)
     if factura.total < total_pagado(factura) - 0.5:
-        formulario.add_error(None, 'Con este cambio el total quedaría por debajo de lo que ya se pagó.')
+        formulario.add_error(None, 'Con este cambio el total quedaria por debajo de lo que ya se pago.')
         return False
     factura.save()
     sincronizar_venta(factura)
-    registrar_auditoria(request, accion, 'pagos', f'Modificó los ítems de la factura {factura.numero_factura}')
+    registrar_auditoria(request, accion, 'pagos', f'Modifico los items de la factura {factura.numero_factura}')
     return True
 
 
@@ -398,7 +384,7 @@ def agregar_item(request, id):
     return render(request, 'pagos_facturacion/formulario_item.html', {
         'formulario': formulario,
         'factura': factura,
-        'titulo': 'Agregar ítem',
+        'titulo': 'Agregar item',
     })
 
 
@@ -432,7 +418,7 @@ def editar_item(request, id, indice):
     return render(request, 'pagos_facturacion/formulario_item.html', {
         'formulario': formulario,
         'factura': factura,
-        'titulo': 'Editar ítem',
+        'titulo': 'Editar item',
     })
 
 
@@ -448,9 +434,9 @@ def eliminar_item(request, id, indice):
     item = factura.items[indice]
     nuevo_total = (factura.subtotal - valor_item(item)) * (1 + porcentaje_iva(factura) / 100)
     if item['concepto'] == 'vehiculo':
-        bloqueo = 'El ítem del vehículo es obligatorio: la factura corresponde a su venta.'
+        bloqueo = 'El item del vehiculo es obligatorio: la factura corresponde a su venta.'
     elif nuevo_total < total_pagado(factura) - 0.5:
-        bloqueo = 'Sin este ítem el total quedaría por debajo de lo que ya se pagó.'
+        bloqueo = 'Sin este item el total quedaria por debajo de lo que ya se pago.'
     else:
         bloqueo = ''
 
@@ -458,11 +444,11 @@ def eliminar_item(request, id, indice):
         factura.items.pop(indice)
         recalcular(factura)
         factura.save()
-        registrar_auditoria(request, 'eliminar', 'pagos', f'Quitó un ítem de la factura {factura.numero_factura}')
+        registrar_auditoria(request, 'eliminar', 'pagos', f'Quito un item de la factura {factura.numero_factura}')
         return redirect('pagos:detalle_factura', id=id)
 
     return render(request, 'confirmar_eliminar.html', {
-        'titulo': 'Quitar ítem',
+        'titulo': 'Quitar item',
         'objeto': f'{nombre_concepto(item["concepto"])} {item["descripcion"]} de la factura {factura.numero_factura}',
         'bloqueado': bool(bloqueo),
         'motivo': bloqueo,
@@ -471,10 +457,6 @@ def eliminar_item(request, id, indice):
         'id_cancelar': factura.id,
     })
 
-
-# =====================================================================
-# Plan de cuotas
-# =====================================================================
 
 @requiere_permiso('pagos')
 def generar_cuotas(request, id):
@@ -491,12 +473,11 @@ def generar_cuotas(request, id):
             factura.cuotas = [{
                 'numero': n + 1,
                 'fecha_vencimiento': sumar_meses(datos['fecha_primera'], n),
-                # La última cuota absorbe la diferencia del redondeo
                 'valor': valor if n < numero - 1 else factura.total - valor * (numero - 1),
             } for n in range(numero)]
             factura.save()
             registrar_auditoria(request, 'crear', 'pagos',
-                                f'Generó un plan de {numero} cuotas para la factura {factura.numero_factura}')
+                                f'Genero un plan de {numero} cuotas para la factura {factura.numero_factura}')
             return redirect('pagos:detalle_factura', id=id)
     else:
         formulario = FormularioPlanCuotas(initial={
@@ -523,7 +504,7 @@ def editar_cuota(request, id, indice):
             cuota['fecha_vencimiento'] = formulario.cleaned_data['fecha_vencimiento']
             factura.save()
             registrar_auditoria(request, 'editar', 'pagos',
-                                f'Cambió la fecha de la cuota {cuota["numero"]} de la factura {factura.numero_factura}')
+                                f'Cambio la fecha de la cuota {cuota["numero"]} de la factura {factura.numero_factura}')
             return redirect('pagos:detalle_factura', id=id)
     else:
         formulario = FormularioCuota(initial={'fecha_vencimiento': como_fecha(cuota['fecha_vencimiento'])})
@@ -544,7 +525,7 @@ def eliminar_cuotas(request, id):
     if request.method == 'POST':
         factura.cuotas = []
         factura.save()
-        registrar_auditoria(request, 'eliminar', 'pagos', f'Eliminó el plan de cuotas de la factura {factura.numero_factura}')
+        registrar_auditoria(request, 'eliminar', 'pagos', f'Elimino el plan de cuotas de la factura {factura.numero_factura}')
         return redirect('pagos:detalle_factura', id=id)
 
     return render(request, 'confirmar_eliminar.html', {
@@ -555,10 +536,6 @@ def eliminar_cuotas(request, id):
         'id_cancelar': factura.id,
     })
 
-
-# =====================================================================
-# Pagos (embebidos en la factura)
-# =====================================================================
 
 def datos_pago(datos):
     return {
@@ -597,10 +574,9 @@ def registrar_pago(request, id):
                 factura.pagos.append(datos_pago(datos))
                 actualizar_estado(factura)
                 factura.save()
-                registrar_auditoria(request, 'crear', 'pagos', f'Registró un pago en la factura {factura.numero_factura}')
+                registrar_auditoria(request, 'crear', 'pagos', f'Registro un pago en la factura {factura.numero_factura}')
                 return redirect('pagos:detalle_factura', id=factura.id)
     else:
-        # Si hay plan de cuotas, se sugiere el valor de la siguiente cuota
         siguiente = next((c for c in estado_cuotas(factura) if c['estado'] != 'pagada'), None)
         monto = siguiente['valor'] - siguiente['abonado'] if siguiente else saldo(factura)
         formulario = FormularioPago(maximo=saldo(factura), initial={
@@ -655,7 +631,7 @@ def editar_pago(request, id, indice):
                 factura.pagos[indice] = datos_pago(datos)
                 actualizar_estado(factura)
                 factura.save()
-                registrar_auditoria(request, 'editar', 'pagos', f'Editó un pago de la factura {factura.numero_factura}')
+                registrar_auditoria(request, 'editar', 'pagos', f'Edito un pago de la factura {factura.numero_factura}')
                 return redirect('pagos:detalle_factura', id=factura.id)
     else:
         formulario = FormularioPago(maximo=maximo, initial=pago)
@@ -680,13 +656,13 @@ def eliminar_pago(request, id, indice):
         actualizar_estado(factura)
         factura.save()
         registrar_auditoria(request, 'eliminar', 'pagos',
-                            f'Eliminó un pago de {texto} de la factura {factura.numero_factura}')
+                            f'Elimino un pago de {texto} de la factura {factura.numero_factura}')
         return redirect('pagos:detalle_factura', id=id)
 
     return render(request, 'confirmar_eliminar.html', {
         'titulo': 'Eliminar pago',
         'objeto': f'el pago de {texto} del {como_fecha(pago["fecha_pago"]):%d/%m/%Y} (factura {factura.numero_factura})',
-        'advertencia': 'El saldo de la factura aumentará y, si estaba pagada, volverá a quedar emitida.',
+        'advertencia': 'El saldo de la factura aumentara y, si estaba pagada, volvera a quedar emitida.',
         'url_cancelar': 'pagos:detalle_factura',
         'id_cancelar': factura.id,
     })
@@ -705,8 +681,6 @@ def lista_pagos(request):
                                   anulada=factura.estado == 'anulada'))
     pagos.sort(key=lambda p: p['fecha_pago'], reverse=True)
 
-    # Los pagos de facturas anuladas se siguen mostrando (dinero por devolver),
-    # pero no cuentan como recaudado.
     return render(request, 'pagos_facturacion/lista_pagos.html', {
         'pagos': pagos,
         'medio': medio,
