@@ -3,10 +3,10 @@
 {% block titulo_pagina %}Cotizaciones{% endblock %}
 {% block miga %}Ventas{% endblock %}
 {% block titulo %}Cotizaciones{% endblock %}
-{% block subtitulo %}Cada cotización se guarda dentro de su cliente. Al aprobarla, el vehículo queda reservado.{% endblock %}
+{% block subtitulo %}Cada cotizacion se guarda dentro de su cliente. Al aprobarla, el vehiculo queda reservado.{% endblock %}
 {% block acciones %}
     <a class="boton boton-primario" href="{% url 'ventas:crear_cotizacion' %}">
-        {% include 'parciales/icono.html' with nombre='mas' %} Nueva cotización
+        {% include 'parciales/icono.html' with nombre='mas' %} Nueva cotizacion
     </a>
 {% endblock %}
 
@@ -22,7 +22,7 @@
     </div>
     <form class="filtros" method="get">
         <input type="hidden" name="estado" value="{{ estado }}">
-        <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por cliente, cédula, vehículo o placa…">
+        <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por cliente, cedula, vehiculo o placa…">
         <button class="boton boton-secundario" type="submit">Buscar</button>
         {% if busqueda %}<a class="boton boton-secundario" href="?estado={{ estado }}">Limpiar</a>{% endif %}
     </form>
@@ -31,7 +31,7 @@
     <div class="tabla-contenedor">
         <table>
             <thead>
-                <tr><th>Cliente</th><th>Vehículo</th><th>Asesor</th><th>Fecha</th><th>Estado</th><th class="texto-derecha">Oferta</th></tr>
+                <tr><th>Cliente</th><th>Vehiculo</th><th>Asesor</th><th>Fecha</th><th>Estado</th><th class="texto-derecha">Oferta</th></tr>
             </thead>
             <tbody>
             {% for cotizacion in cotizaciones %}
@@ -56,7 +56,7 @@
         </table>
     </div>
     {% else %}
-        {% include 'parciales/vacio.html' with icono='cotizacion' titulo='No hay cotizaciones' mensaje='Crea una cotización para un cliente y un vehículo del inventario.' %}
+        {% include 'parciales/vacio.html' with icono='cotizacion' titulo='No hay cotizaciones' mensaje='Crea una cotizacion para un cliente y un vehiculo del inventario.' %}
     {% endif %}
 </div>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 
-{% block titulo_pagina %}Cotización{% endblock %}
+{% block titulo_pagina %}Cotizacion{% endblock %}
 {% block miga %}<a href="{% url 'ventas:lista_cotizaciones' %}">Cotizaciones</a> / Detalle{% endblock %}
 {% block titulo %}{{ cotizacion.vehiculo.marca }} {{ cotizacion.vehiculo.modelo }} para {{ cliente.nombre }} {{ cliente.apellido }}{% endblock %}
 {% block subtitulo %}Cotizada el {{ cotizacion.fecha|date:"d M Y" }} por {{ cotizacion.vendedor.nombre }} {{ cotizacion.vendedor.apellido }}{% endblock %}
@@ -81,9 +81,9 @@
                 {% endif %}
             </div>
             {% elif cotizacion.estado == 'aprobada' %}
-                {% include 'parciales/vacio.html' with icono='venta' titulo='Lista para vender' mensaje='La cotización está aprobada. Registra la venta cuando el cliente confirme.' %}
+                {% include 'parciales/vacio.html' with icono='venta' titulo='Lista para vender' mensaje='La cotizacion esta aprobada. Registra la venta cuando el cliente confirme.' %}
             {% else %}
-                {% include 'parciales/vacio.html' with icono='venta' titulo='Sin venta' mensaje='Primero aprueba la cotización para poder registrar la venta.' %}
+                {% include 'parciales/vacio.html' with icono='venta' titulo='Sin venta' mensaje='Primero aprueba la cotizacion para poder registrar la venta.' %}
             {% endif %}
         </div>
     </div>
@@ -103,7 +103,7 @@
             </div>
         </div>
         <div class="tarjeta">
-            <div class="tarjeta-titulo"><h2>Vehículo</h2></div>
+            <div class="tarjeta-titulo"><h2>Vehiculo</h2></div>
             <div class="tarjeta-cuerpo">
                 <div class="datos">
                     <div class="dato"><small>Marca</small><span>{{ cotizacion.vehiculo.marca }}</span></div>

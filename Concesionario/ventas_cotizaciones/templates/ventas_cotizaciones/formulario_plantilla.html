@@ -3,7 +3,7 @@
 {% block titulo_pagina %}{{ titulo }}{% endblock %}
 {% block miga %}<a href="{% url 'ventas:lista_plantillas' %}">Plantillas</a> / Formulario{% endblock %}
 {% block titulo %}{{ titulo }}{% endblock %}
-{% block subtitulo %}Las condiciones y los descuentos se agregan después, desde el detalle de la plantilla.{% endblock %}
+{% block subtitulo %}Las condiciones y los descuentos se agregan despues, desde el detalle de la plantilla.{% endblock %}
 
 {% block contenido %}
 {% if plantilla %}{% url 'ventas:detalle_plantilla' plantilla.id as cancelar %}{% else %}{% url 'ventas:lista_plantillas' as cancelar %}{% endif %}

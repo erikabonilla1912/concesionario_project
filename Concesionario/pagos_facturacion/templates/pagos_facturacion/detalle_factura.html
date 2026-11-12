@@ -151,7 +151,7 @@
 
             {% if factura.estado != 'anulada' %}
             <div class="separado">
-                <div class="progreso"><div style="width: {{ porcentaje }}%"></div></div>
+                <progress class="progreso-barra" value="{{ porcentaje }}" max="100">{{ porcentaje }} %</progress>
                 <div class="resumen-total"><span>Pagado ({{ porcentaje }} %)</span><span>${{ pagado|floatformat:0 }}</span></div>
                 <div class="resumen-total"><span class="fuerte">Saldo</span><span class="fuerte">${{ saldo|floatformat:0 }}</span></div>
             </div>

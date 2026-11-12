@@ -5,11 +5,9 @@ from clientes_vehiculos.models import Cliente, Vehiculo
 from .models import Cotizacion, PlantillaCotizacion, Venta
 
 
-# ---------------- Plantillas ----------------
-
 class FormularioPlantilla(forms.Form):
     nombre = forms.CharField(label='Nombre de la plantilla', max_length=100)
-    descripcion = forms.CharField(label='Descripción', required=False,
+    descripcion = forms.CharField(label='Descripcion', required=False,
                                   widget=forms.Textarea(attrs={'rows': 2}))
     notas_adicionales = forms.CharField(label='Notas adicionales', required=False,
                                         widget=forms.Textarea(attrs={'rows': 2}))
@@ -28,7 +26,7 @@ class FormularioPlantilla(forms.Form):
 
 
 class FormularioCondicion(forms.Form):
-    titulo = forms.CharField(label='Título', max_length=150)
+    titulo = forms.CharField(label='Titulo', max_length=150)
     contenido = forms.CharField(label='Contenido', widget=forms.Textarea(attrs={'rows': 3}))
     orden = forms.IntegerField(label='Orden', min_value=1, initial=1)
 
@@ -36,14 +34,11 @@ class FormularioCondicion(forms.Form):
 class FormularioDescuento(forms.Form):
     nombre = forms.CharField(label='Nombre del descuento', max_length=100)
     porcentaje = forms.FloatField(label='Porcentaje (%)', min_value=0.5, max_value=50)
-    descripcion = forms.CharField(label='Descripción', required=False,
+    descripcion = forms.CharField(label='Descripcion', required=False,
                                   widget=forms.Textarea(attrs={'rows': 2}))
 
 
-# ---------------- Cotizaciones y ventas ----------------
-
 def opciones_descuento():
-    """Descuentos de las plantillas activas. El valor es 'id_plantilla-posición'."""
     opciones = [('', 'Sin descuento')]
     for plantilla in PlantillaCotizacion.objects.all().order_by('nombre'):
         if plantilla.activa:
@@ -55,10 +50,10 @@ def opciones_descuento():
 
 class FormularioCotizacion(forms.Form):
     cliente = forms.ChoiceField(label='Cliente')
-    vehiculo = forms.ChoiceField(label='Vehículo')
+    vehiculo = forms.ChoiceField(label='Vehiculo')
     descuento = forms.ChoiceField(label='Descuento de plantilla', required=False)
     precio_ofertado = forms.FloatField(label='Precio ofertado (COP)', min_value=0, required=False,
-                                       help_text='Si lo dejas vacío se calcula con el precio del vehículo y el descuento.')
+                                       help_text='Si lo dejas vacio se calcula con el precio del vehiculo y el descuento.')
     fecha = CampoFecha(label='Fecha')
     notas = forms.CharField(label='Notas', required=False, widget=forms.Textarea(attrs={'rows': 3}))
 
@@ -68,7 +63,7 @@ class FormularioCotizacion(forms.Form):
             (str(c.id), f'{c.nombre} {c.apellido} · C.C. {c.cedula}')
             for c in Cliente.objects.all().order_by('nombre')
         ]
-        self.fields['vehiculo'].choices = [('', 'Selecciona un vehículo')] + [
+        self.fields['vehiculo'].choices = [('', 'Selecciona un vehiculo')] + [
             (v.placa, f'{v.marca} {v.modelo} {v.anio} · {v.placa} · ${v.precio or 0:,.0f}'.replace(',', '.'))
             for v in Vehiculo.objects.exclude(estado='vendido').order_by('marca')
         ]
@@ -84,7 +79,6 @@ class FormularioEditarCotizacion(forms.Form):
     def __init__(self, *args, vendida=False, **kwargs):
         super().__init__(*args, **kwargs)
         if vendida:
-            # Una cotización con venta ya no cambia de estado ni de precio
             self.fields['estado'].disabled = True
             self.fields['precio_ofertado'].disabled = True
 

@@ -52,7 +52,7 @@
                 <li>
                     <div>
                         <span class="fuerte">{{ descuento.nombre }}</span><br>
-                        <span class="texto-suave texto-pequeno">{{ descuento.descripcion|default:"Sin descripción" }}</span>
+                        <span class="texto-suave texto-pequeno">{{ descuento.descripcion|default:"Sin descripcion" }}</span>
                     </div>
                     <div class="acciones">
                         <span class="monto">{{ descuento.porcentaje|floatformat:"-1" }} %</span>
@@ -83,7 +83,7 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="dato separado"><small>Descripción</small><span>{{ plantilla.descripcion|default:"—" }}</span></div>
+            <div class="dato separado"><small>Descripcion</small><span>{{ plantilla.descripcion|default:"—" }}</span></div>
             <div class="dato separado"><small>Notas adicionales</small><span>{{ plantilla.notas_adicionales|default:"—"|linebreaksbr }}</span></div>
             <div class="datos separado">
                 <div class="dato"><small>Creada</small><span>{{ plantilla.fecha_creacion|date:"d M Y" }}</span></div>

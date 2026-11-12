@@ -22,7 +22,6 @@ def buscar_plantilla(id):
 
 
 def buscar_cotizacion(id):
-    """Devuelve la cotización con su cliente adjunto en .cliente (o None)."""
     cotizacion = Cotizacion.objects.filter(id=id).first()
     if cotizacion is None:
         return None
@@ -37,10 +36,6 @@ def texto_cotizacion(cotizacion):
     return (f'{vehiculo["marca"]} {vehiculo["modelo"]} ({vehiculo["placa"]}) '
             f'para {cliente.nombre} {cliente.apellido}')
 
-
-# =====================================================================
-# Plantillas de cotización (colección plantillasCotizacion)
-# =====================================================================
 
 @requiere_permiso('ventas')
 def lista_plantillas(request):
@@ -70,14 +65,14 @@ def crear_plantilla(request):
                 descuentos=[],
                 notas_adicionales=datos['notas_adicionales'],
             )
-            registrar_auditoria(request, 'crear', 'ventas', f'Creó la plantilla {plantilla.nombre}')
+            registrar_auditoria(request, 'crear', 'ventas', f'Creo la plantilla {plantilla.nombre}')
             return redirect('ventas:detalle_plantilla', id=plantilla.id)
     else:
         formulario = FormularioPlantilla()
 
     return render(request, 'ventas_cotizaciones/formulario_plantilla.html', {
         'formulario': formulario,
-        'titulo': 'Nueva plantilla de cotización',
+        'titulo': 'Nueva plantilla de cotizacion',
     })
 
 
@@ -111,7 +106,7 @@ def editar_plantilla(request, id):
             plantilla.activa = datos['activa']
             plantilla.notas_adicionales = datos['notas_adicionales']
             plantilla.save()
-            registrar_auditoria(request, 'editar', 'ventas', f'Editó la plantilla {plantilla.nombre}')
+            registrar_auditoria(request, 'editar', 'ventas', f'Edito la plantilla {plantilla.nombre}')
             return redirect('ventas:detalle_plantilla', id=plantilla.id)
     else:
         formulario = FormularioPlantilla(plantilla=plantilla, initial={
@@ -136,7 +131,7 @@ def eliminar_plantilla(request, id):
 
     if request.method == 'POST':
         plantilla.delete()
-        registrar_auditoria(request, 'eliminar', 'ventas', f'Eliminó la plantilla {plantilla.nombre}')
+        registrar_auditoria(request, 'eliminar', 'ventas', f'Elimino la plantilla {plantilla.nombre}')
         return redirect('ventas:lista_plantillas')
 
     return render(request, 'confirmar_eliminar.html', {
@@ -159,7 +154,7 @@ def agregar_condicion(request, id):
         if formulario.is_valid():
             datos = formulario.cleaned_data
             if any(c['titulo'].lower() == datos['titulo'].lower() for c in plantilla.condiciones):
-                formulario.add_error('titulo', 'La plantilla ya tiene una condición con ese título.')
+                formulario.add_error('titulo', 'La plantilla ya tiene una condicion con ese titulo.')
             else:
                 plantilla.condiciones.append({
                     'titulo': datos['titulo'],
@@ -167,7 +162,7 @@ def agregar_condicion(request, id):
                     'orden': datos['orden'],
                 })
                 plantilla.save()
-                registrar_auditoria(request, 'crear', 'ventas', f'Agregó una condición a {plantilla.nombre}')
+                registrar_auditoria(request, 'crear', 'ventas', f'Agrego una condicion a {plantilla.nombre}')
                 return redirect('ventas:detalle_plantilla', id=plantilla.id)
     else:
         formulario = FormularioCondicion(initial={'orden': len(plantilla.condiciones) + 1})
@@ -175,7 +170,7 @@ def agregar_condicion(request, id):
     return render(request, 'ventas_cotizaciones/formulario_detalle_plantilla.html', {
         'formulario': formulario,
         'plantilla': plantilla,
-        'titulo': 'Agregar condición',
+        'titulo': 'Agregar condicion',
     })
 
 
@@ -185,7 +180,7 @@ def eliminar_condicion(request, id, indice):
     if plantilla and request.method == 'POST' and indice < len(plantilla.condiciones):
         plantilla.condiciones.pop(indice)
         plantilla.save()
-        registrar_auditoria(request, 'eliminar', 'ventas', f'Quitó una condición de {plantilla.nombre}')
+        registrar_auditoria(request, 'eliminar', 'ventas', f'Quito una condicion de {plantilla.nombre}')
     return redirect('ventas:detalle_plantilla', id=id)
 
 
@@ -208,7 +203,7 @@ def agregar_descuento(request, id):
                     'descripcion': datos['descripcion'],
                 })
                 plantilla.save()
-                registrar_auditoria(request, 'crear', 'ventas', f'Agregó un descuento a {plantilla.nombre}')
+                registrar_auditoria(request, 'crear', 'ventas', f'Agrego un descuento a {plantilla.nombre}')
                 return redirect('ventas:detalle_plantilla', id=plantilla.id)
     else:
         formulario = FormularioDescuento()
@@ -226,13 +221,9 @@ def eliminar_descuento(request, id, indice):
     if plantilla and request.method == 'POST' and indice < len(plantilla.descuentos):
         plantilla.descuentos.pop(indice)
         plantilla.save()
-        registrar_auditoria(request, 'eliminar', 'ventas', f'Quitó un descuento de {plantilla.nombre}')
+        registrar_auditoria(request, 'eliminar', 'ventas', f'Quito un descuento de {plantilla.nombre}')
     return redirect('ventas:detalle_plantilla', id=id)
 
-
-# =====================================================================
-# Cotizaciones (colección cotizaciones)
-# =====================================================================
 
 @requiere_permiso('ventas')
 def lista_cotizaciones(request):
@@ -271,7 +262,7 @@ def crear_cotizacion(request):
             abierta = [c for c in Cotizacion.objects.filter(id_cliente=cliente.id)
                        if c.vehiculo['placa'] == vehiculo.placa and c.estado != 'rechazada' and not c.venta]
             if abierta:
-                formulario.add_error('vehiculo', 'El cliente ya tiene una cotización abierta para este vehículo.')
+                formulario.add_error('vehiculo', 'El cliente ya tiene una cotizacion abierta para este vehiculo.')
             else:
                 notas = datos['notas']
                 porcentaje = 0
@@ -304,7 +295,7 @@ def crear_cotizacion(request):
                     venta=None,
                 )
                 cotizacion.cliente = cliente
-                registrar_auditoria(request, 'crear', 'ventas', f'Cotizó {texto_cotizacion(cotizacion)}')
+                registrar_auditoria(request, 'crear', 'ventas', f'Cotizo {texto_cotizacion(cotizacion)}')
                 return redirect('ventas:detalle_cotizacion', id=cotizacion.id)
     else:
         formulario = FormularioCotizacion(initial={
@@ -315,7 +306,7 @@ def crear_cotizacion(request):
 
     return render(request, 'ventas_cotizaciones/formulario_cotizacion.html', {
         'formulario': formulario,
-        'titulo': 'Nueva cotización',
+        'titulo': 'Nueva cotizacion',
     })
 
 
@@ -359,7 +350,7 @@ def editar_cotizacion(request, id):
             cotizacion.notas = datos['notas']
             cotizacion.save()
             actualizar_estado_vehiculo(cotizacion.vehiculo['placa'])
-            registrar_auditoria(request, 'editar', 'ventas', f'Editó la cotización {texto_cotizacion(cotizacion)}')
+            registrar_auditoria(request, 'editar', 'ventas', f'Edito la cotizacion {texto_cotizacion(cotizacion)}')
             return redirect('ventas:detalle_cotizacion', id=cotizacion.id)
     else:
         formulario = FormularioEditarCotizacion(vendida=vendida, initial={
@@ -371,7 +362,7 @@ def editar_cotizacion(request, id):
 
     return render(request, 'ventas_cotizaciones/formulario_cotizacion.html', {
         'formulario': formulario,
-        'titulo': 'Editar cotización',
+        'titulo': 'Editar cotizacion',
         'cliente': cotizacion.cliente,
         'cotizacion': cotizacion,
     })
@@ -386,7 +377,7 @@ def cambiar_estado_cotizacion(request, id, estado):
         cotizacion.save()
         actualizar_estado_vehiculo(cotizacion.vehiculo['placa'])
         registrar_auditoria(request, 'editar', 'ventas',
-                            f'Marcó como {estado} la cotización {texto_cotizacion(cotizacion)}')
+                            f'Marco como {estado} la cotizacion {texto_cotizacion(cotizacion)}')
     return redirect('ventas:detalle_cotizacion', id=id)
 
 
@@ -400,21 +391,17 @@ def eliminar_cotizacion(request, id):
     if request.method == 'POST' and not vendida:
         cotizacion.delete()
         actualizar_estado_vehiculo(cotizacion.vehiculo['placa'])
-        registrar_auditoria(request, 'eliminar', 'ventas', f'Eliminó la cotización {texto_cotizacion(cotizacion)}')
+        registrar_auditoria(request, 'eliminar', 'ventas', f'Elimino la cotizacion {texto_cotizacion(cotizacion)}')
         return redirect('ventas:lista_cotizaciones')
 
     return render(request, 'confirmar_eliminar.html', {
-        'titulo': 'Eliminar cotización',
+        'titulo': 'Eliminar cotizacion',
         'objeto': texto_cotizacion(cotizacion),
         'bloqueado': vendida,
-        'motivo': 'La cotización ya tiene una venta. Primero elimina la venta.',
+        'motivo': 'La cotizacion ya tiene una venta. Primero elimina la venta.',
         'url_volver': reverse('ventas:detalle_cotizacion', args=[id]),
     })
 
-
-# =====================================================================
-# Ventas (embebidas en la cotización)
-# =====================================================================
 
 @requiere_permiso('ventas')
 def registrar_venta(request, id):
@@ -430,7 +417,7 @@ def registrar_venta(request, id):
         if formulario.is_valid():
             datos = formulario.cleaned_data
             if any(c.venta for c in cotizaciones_de_placa(placa)):
-                formulario.add_error(None, 'Este vehículo ya fue vendido en otra cotización.')
+                formulario.add_error(None, 'Este vehiculo ya fue vendido en otra cotizacion.')
             else:
                 cotizacion.venta = {
                     'fecha_venta': datos['fecha_venta'],
@@ -441,7 +428,7 @@ def registrar_venta(request, id):
                 cotizacion.save()
                 actualizar_estado_vehiculo(placa)
                 actualizar_metas(cotizacion.vendedor['nombre_usuario'])
-                registrar_auditoria(request, 'crear', 'ventas', f'Registró la venta de {texto_cotizacion(cotizacion)}')
+                registrar_auditoria(request, 'crear', 'ventas', f'Registro la venta de {texto_cotizacion(cotizacion)}')
                 return redirect('ventas:detalle_cotizacion', id=id)
     else:
         formulario = FormularioVenta(initial={
@@ -485,7 +472,7 @@ def eliminar_venta(request, id):
         cotizacion.save()
         actualizar_estado_vehiculo(cotizacion.vehiculo['placa'])
         actualizar_metas(cotizacion.vendedor['nombre_usuario'])
-        registrar_auditoria(request, 'eliminar', 'ventas', f'Eliminó la venta de {texto_cotizacion(cotizacion)}')
+        registrar_auditoria(request, 'eliminar', 'ventas', f'Elimino la venta de {texto_cotizacion(cotizacion)}')
         return redirect('ventas:detalle_cotizacion', id=id)
 
     return render(request, 'confirmar_eliminar.html', {
@@ -493,6 +480,6 @@ def eliminar_venta(request, id):
         'objeto': f'la venta de {texto_cotizacion(cotizacion)}',
         'bloqueado': facturada,
         'motivo': f'La venta tiene la factura {cotizacion.venta["numero_factura"]}. Primero anula o elimina la factura.',
-        'advertencia': 'La cotización vuelve a quedar aprobada y el vehículo reservado.',
+        'advertencia': 'La cotizacion vuelve a quedar aprobada y el vehiculo reservado.',
         'url_volver': reverse('ventas:detalle_cotizacion', args=[id]),
     })

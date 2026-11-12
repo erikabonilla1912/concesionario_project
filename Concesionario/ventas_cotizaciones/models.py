@@ -1,11 +1,9 @@
 from djongo import models
 
-# ResumenUsuario se define una sola vez en gestion_usuarios
 from gestion_usuarios.models import ResumenUsuario
 
 
 class VehiculoCotizacion(models.Model):
-    """Copia del vehículo al momento de cotizar (el precio puede cambiar después)."""
     marca = models.CharField(max_length=50)
     modelo = models.CharField(max_length=50)
     anio = models.IntegerField()
@@ -17,16 +15,13 @@ class VehiculoCotizacion(models.Model):
 
 
 class Venta(models.Model):
-    # Única definición de la forma de pago: la usan la venta y los pagos de la factura
     FORMAS_PAGO = [
         ('contado', 'Contado'),
-        ('credito', 'Crédito'),
+        ('credito', 'Credito'),
     ]
     fecha_venta = models.DateField(null=True, blank=True)
     precio_final = models.FloatField(null=True, blank=True)
     forma_pago = models.CharField(max_length=50, blank=True, choices=FORMAS_PAGO)
-    # La factura vive solo en la colección facturas (pagos_facturacion);
-    # aquí se guarda únicamente su número para no repetirla.
     numero_factura = models.CharField(max_length=20, blank=True)
 
     class Meta:
@@ -34,8 +29,6 @@ class Venta(models.Model):
 
 
 class Cotizacion(models.Model):
-    """Colección propia: así vehiculo, vendedor y venta quedan a un solo nivel
-    (antes estaban dentro de la cotización que a su vez estaba dentro del cliente)."""
     ESTADOS = [
         ('pendiente', 'Pendiente'),
         ('aprobada', 'Aprobada'),
@@ -58,7 +51,7 @@ class Cotizacion(models.Model):
         db_table = 'cotizaciones'
 
     def __str__(self):
-        return f"Cotización {self.id} · {self.vehiculo['placa']}"
+        return f"Cotizacion {self.id} · {self.vehiculo['placa']}"
 
 
 class Condicion(models.Model):

@@ -1,9 +1,9 @@
 {% extends 'layout.html' %}
 
-{% block titulo_pagina %}Plantillas de cotización{% endblock %}
+{% block titulo_pagina %}Plantillas de cotizacion{% endblock %}
 {% block miga %}Ventas{% endblock %}
-{% block titulo %}Plantillas de cotización{% endblock %}
-{% block subtitulo %}{{ total }} plantilla{{ total|pluralize }}. Sus descuentos se pueden aplicar al crear una cotización.{% endblock %}
+{% block titulo %}Plantillas de cotizacion{% endblock %}
+{% block subtitulo %}{{ total }} plantilla{{ total|pluralize }}. Sus descuentos se pueden aplicar al crear una cotizacion.{% endblock %}
 {% block acciones %}
     <a class="boton boton-primario" href="{% url 'ventas:crear_plantilla' %}">
         {% include 'parciales/icono.html' with nombre='mas' %} Nueva plantilla
@@ -13,7 +13,7 @@
 {% block contenido %}
 <div class="tarjeta">
     <form class="filtros" method="get">
-        <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por nombre o descripción…">
+        <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por nombre o descripcion…">
         <button class="boton boton-secundario" type="submit">Buscar</button>
         {% if busqueda %}<a class="boton boton-secundario" href="{% url 'ventas:lista_plantillas' %}">Limpiar</a>{% endif %}
     </form>
@@ -28,7 +28,7 @@
             {% for plantilla in plantillas %}
                 <tr class="fila-enlace" data-href="{% url 'ventas:detalle_plantilla' plantilla.id %}">
                     <td><span class="fuerte">{{ plantilla.nombre }}</span><br>
-                        <span class="texto-suave texto-pequeno">{{ plantilla.descripcion|default:"Sin descripción"|truncatechars:70 }}</span></td>
+                        <span class="texto-suave texto-pequeno">{{ plantilla.descripcion|default:"Sin descripcion"|truncatechars:70 }}</span></td>
                     <td class="texto-derecha">{{ plantilla.condiciones|length }}</td>
                     <td class="texto-derecha">{{ plantilla.descuentos|length }}</td>
                     <td>{{ plantilla.creado_por.nombre }} {{ plantilla.creado_por.apellido }}<br>

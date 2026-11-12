@@ -3,7 +3,7 @@
 {% block titulo_pagina %}Ventas{% endblock %}
 {% block miga %}Ventas{% endblock %}
 {% block titulo %}Ventas{% endblock %}
-{% block subtitulo %}Cada venta se guarda dentro de la cotización aprobada que la originó.{% endblock %}
+{% block subtitulo %}Cada venta se guarda dentro de la cotizacion aprobada que la origino.{% endblock %}
 {% block acciones %}
     <a class="boton boton-primario" href="{% url 'ventas:lista_cotizaciones' %}?estado=aprobada">
         {% include 'parciales/icono.html' with nombre='cotizacion' %} Cotizaciones aprobadas
@@ -42,7 +42,7 @@
     <div class="tabla-contenedor">
         <table>
             <thead>
-                <tr><th>Fecha</th><th>Cliente</th><th>Vehículo</th><th>Asesor</th><th>Factura</th><th class="texto-derecha">Precio final</th></tr>
+                <tr><th>Fecha</th><th>Cliente</th><th>Vehiculo</th><th>Asesor</th><th>Factura</th><th class="texto-derecha">Precio final</th></tr>
             </thead>
             <tbody>
             {% for venta in ventas %}
@@ -66,7 +66,7 @@
         </table>
     </div>
     {% else %}
-        {% include 'parciales/vacio.html' with icono='venta' titulo='No hay ventas' mensaje='Las ventas se registran desde una cotización aprobada.' %}
+        {% include 'parciales/vacio.html' with icono='venta' titulo='No hay ventas' mensaje='Las ventas se registran desde una cotizacion aprobada.' %}
     {% endif %}
 </div>
 {% endblock %}
