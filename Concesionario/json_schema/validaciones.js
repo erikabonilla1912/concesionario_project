@@ -1,16 +1,3 @@
-// =====================================================================
-// JSON Schema de las colecciones del concesionario.
-// Se ejecuta DESPUÉS de "python manage.py migrate":
-//
-//     mongosh concesionario_app json_schema/validaciones.js
-//
-// Colecciones: usuarios, clientes, vehiculos, cotizaciones, plantillasCotizacion, facturas.
-// Regla del proyecto: ningún objeto tiene otro objeto adentro. Cada documento
-// solo tiene objetos o arreglos de objetos con campos simples (un nivel).
-// Mongo rechaza cualquier documento que no cumpla la estructura, aunque se
-// inserte por fuera de Django. Los nombres de los campos son los mismos de
-// los modelos, porque así es como Djongo los guarda.
-// =====================================================================
 
 const NUMERO = ['double', 'int', 'long'];
 const ENTERO = ['int', 'long'];
@@ -18,7 +5,7 @@ const CORREO = '^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$';
 const CORREO_OPCIONAL = '^$|^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$';
 const PLACA = '^[A-Z0-9-]{3,10}$';
 
-// Campos que Djongo agrega a todos los documentos
+
 const BASE = {
     _id: { bsonType: 'objectId', description: 'Identificador interno de Mongo' },
     id: { bsonType: ENTERO, minimum: 1, description: 'Identificador autoincremental de Django' },
@@ -43,7 +30,7 @@ function arreglo(elemento, descripcion) {
     return { bsonType: 'array', description: descripcion, items: elemento };
 }
 
-// Usuario que crea o atiende (clase ResumenUsuario, definida una sola vez)
+
 const RESUMEN_USUARIO = objeto({
     nombre_usuario: texto(150, 1),
     nombre: texto(100, 1),
@@ -52,7 +39,7 @@ const RESUMEN_USUARIO = objeto({
 
 const esquemas = {
 
-    // ---------------- gestion_usuarios ----------------
+    
     usuarios: objeto({
         ...BASE,
         nombre_usuario: texto(150, 1),
@@ -107,7 +94,6 @@ const esquemas = {
         }), 'Mensajes recibidos'),
     }, null, 'Usuario del concesionario'),
 
-    // ---------------- clientes_vehiculos ----------------
     clientes: objeto({
         ...BASE,
         nombre: texto(100, 1),
@@ -157,7 +143,6 @@ const esquemas = {
         }), 'Choques, robos y otros eventos del vehículo'),
     }, null, 'Vehículo del inventario'),
 
-    // ---------------- ventas_cotizaciones ----------------
     cotizaciones: objeto({
         ...BASE,
         id_cliente: { bsonType: ENTERO, minimum: 1, description: 'id del cliente (colección clientes)' },
@@ -208,7 +193,6 @@ const esquemas = {
         notas_adicionales: { bsonType: 'string' },
     }, null, 'Plantilla de cotización'),
 
-    // ---------------- pagos_facturacion ----------------
     facturas: objeto({
         ...BASE,
         numero_factura: { bsonType: 'string', pattern: '^FAC-[0-9]{5,}$' },
@@ -255,7 +239,6 @@ const esquemas = {
     }, null, 'Factura de una venta (unica coleccion de facturas)'),
 };
 
-// ---------- Aplicar los esquemas ----------
 
 const existentes = db.getCollectionNames();
 

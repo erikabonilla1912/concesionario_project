@@ -1,6 +1,5 @@
 from django.db.models import Q
 from django.shortcuts import redirect, render
-
 from clientes_vehiculos.models import Vehiculo
 from clientes_vehiculos.views import buscar_vehiculo
 from gestion_usuarios.sesion import registrar_auditoria, requiere_permiso
@@ -70,7 +69,6 @@ def detalle_historial(request, id):
 
 @requiere_permiso('historial')
 def lista_mantenimientos(request):
-    """Todos los mantenimientos de todos los vehículos, con filtro por tipo."""
     tipo = request.GET.get('tipo', '')
     filas = []
     for vehiculo in Vehiculo.objects.all():
@@ -88,7 +86,6 @@ def lista_mantenimientos(request):
     })
 
 
-# ---------------- Propietarios anteriores ----------------
 
 def propietario_repetido(vehiculo, datos, omitir=None):
     for i, dueno in enumerate(vehiculo.propietarios_anteriores):
@@ -183,7 +180,6 @@ def eliminar_propietario(request, id, indice):
     })
 
 
-# ---------------- Mantenimientos ----------------
 
 @requiere_permiso('historial')
 def agregar_mantenimiento(request, id):
@@ -269,7 +265,6 @@ def eliminar_mantenimiento(request, id, indice):
     })
 
 
-# ---------------- Siniestros ----------------
 
 def datos_siniestro(datos):
     return {

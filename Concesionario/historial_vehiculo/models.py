@@ -28,7 +28,6 @@ class Mantenimiento(models.Model):
 
 
 class Siniestro(models.Model):
-    """Accidente, robo u otro evento que afectó al vehículo."""
     TIPOS = [
         ('choque', 'Choque'),
         ('robo', 'Robo'),
