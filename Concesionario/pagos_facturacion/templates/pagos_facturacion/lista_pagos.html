@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+
+{% block titulo_pagina %}Pagos recibidos{% endblock %}
+{% block miga %}Pagos y facturacion{% endblock %}
+{% block titulo %}Pagos recibidos{% endblock %}
+{% block subtitulo %}Total recaudado en facturas vigentes: ${{ total|floatformat:0 }}{% if por_devolver %} · Pagos de facturas anuladas (por devolver): ${{ por_devolver|floatformat:0 }}{% endif %}{% endblock %}
+
+{% block contenido %}
+<div class="tarjeta">
+    <form class="filtros" method="get">
+        <select name="medio">
+            <option value="">Todos los medios de pago</option>
+            {% for valor, texto in medios %}
+                <option value="{{ valor }}" {% if valor == medio %}selected{% endif %}>{{ texto }}</option>
+            {% endfor %}
+        </select>
+        <button class="boton boton-secundario" type="submit">Filtrar</button>
+        {% if medio %}<a class="boton boton-secundario" href="{% url 'pagos:lista_pagos' %}">Limpiar</a>{% endif %}
+    </form>
+
+    {% if pagos %}
+    <div class="tabla-contenedor">
+        <table>
+            <thead>
+                <tr><th>Fecha</th><th>Factura</th><th>Cliente</th><th>Medio</th><th>Referencia</th><th class="texto-derecha">Monto</th></tr>
+            </thead>
+            <tbody>
+            {% for pago in pagos %}
+                <tr class="fila-enlace" onclick="window.location='{% url 'pagos:detalle_pago' pago.factura.id pago.indice %}'">
+                    <td class="texto-suave">{{ pago.fecha_pago|date:"d M Y" }}</td>
+                    <td><span class="fuerte">{{ pago.factura.numero_factura }}</span>{% if pago.anulada %}<br>{% include 'parciales/estado.html' with valor='anulada' texto='Anulada · por devolver' %}{% endif %}</td>
+                    <td>{{ pago.factura.nombre_cliente }}</td>
+                    <td>{{ pago.medio }}<br><span class="texto-suave texto-pequeno">{{ pago.forma }}</span></td>
+                    <td>{{ pago.numero_referencia|default:"—" }}</td>
+                    <td class="texto-derecha monto">${{ pago.monto|floatformat:0 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        {% include 'parciales/vacio.html' with icono='pago' titulo='No hay pagos' mensaje='Los pagos se registran desde el detalle de cada factura.' %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+
+{% block titulo_pagina %}Facturas{% endblock %}
+{% block miga %}Pagos y facturacion{% endblock %}
+{% block titulo %}Facturas{% endblock %}
+{% block subtitulo %}{{ total }} factura{{ total|pluralize }}. Cada venta se factura una sola vez y los pagos se guardan dentro de la factura.{% endblock %}
+{% block acciones %}
+    <a class="boton boton-primario" href="{% url 'pagos:crear_factura' %}">
+        {% include 'parciales/icono.html' with nombre='mas' %} Nueva factura
+    </a>
+{% endblock %}
+
+{% block contenido %}
+<div class="tarjeta">
+    <form class="filtros" method="get">
+        <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por numero, cliente, cedula o placa…">
+        <select name="estado">
+            <option value="">Todos los estados</option>
+            {% for valor, texto in estados %}
+                <option value="{{ valor }}" {% if valor == estado %}selected{% endif %}>{{ texto }}</option>
+            {% endfor %}
+        </select>
+        <button class="boton boton-secundario" type="submit">Filtrar</button>
+        {% if busqueda or estado %}<a class="boton boton-secundario" href="{% url 'pagos:lista_facturas' %}">Limpiar</a>{% endif %}
+    </form>
+
+    {% if filas %}
+    <div class="tabla-contenedor">
+        <table>
+            <thead>
+                <tr><th>Factura</th><th>Cliente</th><th>Vehiculo</th><th>Estado</th><th class="texto-derecha">Total</th><th class="texto-derecha">Saldo</th></tr>
+            </thead>
+            <tbody>
+            {% for fila in filas %}
+                <tr class="fila-enlace" onclick="window.location='{% url 'pagos:detalle_factura' fila.factura.id %}'">
+                    <td><span class="fuerte">{{ fila.factura.numero_factura }}</span><br>
+                        <span class="texto-suave texto-pequeno">{{ fila.factura.fecha_emision|date:"d M Y" }}</span></td>
+                    <td>{{ fila.factura.nombre_cliente }}<br><span class="texto-suave texto-pequeno">C.C. {{ fila.factura.cedula_cliente }}</span></td>
+                    <td>{{ fila.factura.placa_vehiculo }}</td>
+                    <td>{% include 'parciales/estado.html' with valor=fila.factura.estado texto=fila.factura.get_estado_display %}</td>
+                    <td class="texto-derecha monto">${{ fila.factura.total|floatformat:0 }}</td>
+                    <td class="texto-derecha">{% if fila.factura.estado == 'anulada' %}—{% else %}${{ fila.saldo|floatformat:0 }}{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        {% include 'parciales/vacio.html' with icono='factura' titulo='No hay facturas' mensaje='Las facturas se generan a partir de una venta registrada.' %}
+    {% endif %}
+</div>
+{% endblock %}

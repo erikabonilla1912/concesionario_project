@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+
+{% block titulo_pagina %}Historial de vehículos{% endblock %}
+{% block miga %}Historial{% endblock %}
+{% block titulo %}Historial de vehículos{% endblock %}
+{% block subtitulo %}Dueños anteriores, mantenimientos y siniestros de los {{ total }} vehículo{{ total|pluralize }} del inventario.{% endblock %}
+{% block acciones %}
+    <a class="boton boton-secundario" href="{% url 'historial:lista_mantenimientos' %}">
+        {% include 'parciales/icono.html' with nombre='historial' %} Todos los mantenimientos
+    </a>
+{% endblock %}
+
+{% block contenido %}
+<div class="tarjeta">
+    <form class="filtros" method="get">
+        <input type="search" name="q" value="{{ busqueda }}" placeholder="Buscar por placa, marca o modelo…">
+        <button class="boton boton-secundario" type="submit">Buscar</button>
+        {% if busqueda %}<a class="boton boton-secundario" href="{% url 'historial:lista_historiales' %}">Limpiar</a>{% endif %}
+    </form>
+
+    {% if filas %}
+    <div class="tabla-contenedor">
+        <table>
+            <thead>
+                <tr><th>Vehículo</th><th class="texto-derecha">Dueños anteriores</th><th class="texto-derecha">Mantenimientos</th><th class="texto-derecha">Siniestros</th><th>Último servicio</th><th class="texto-derecha">Costo total</th></tr>
+            </thead>
+            <tbody>
+            {% for fila in filas %}
+                <tr class="fila-enlace" onclick="window.location='{% url 'historial:detalle_historial' fila.vehiculo.id %}'">
+                    <td><span class="fuerte">{{ fila.vehiculo.marca }} {{ fila.vehiculo.modelo }} {{ fila.vehiculo.anio|stringformat:"d" }}</span><br>
+                        <span class="texto-suave texto-pequeno">{{ fila.vehiculo.placa }}</span></td>
+                    <td class="texto-derecha">{{ fila.duenos }}</td>
+                    <td class="texto-derecha">{{ fila.mantenimientos }}</td>
+                    <td class="texto-derecha">{{ fila.siniestros }}</td>
+                    <td class="texto-suave">{{ fila.ultimo|date:"d M Y"|default:"—" }}</td>
+                    <td class="texto-derecha monto">${{ fila.costo|floatformat:0 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        {% include 'parciales/vacio.html' with icono='historial' titulo='No hay vehículos' mensaje='Primero registra vehículos en el módulo de Clientes y vehículos.' %}
+    {% endif %}
+</div>
+{% endblock %}

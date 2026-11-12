@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura {{ factura.numero_factura }} · AutoNova</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+</head>
+<body class="impresion">
+<div class="impresion-hoja">
+    <div class="impresion-acciones">
+        <button class="boton boton-primario" onclick="window.print()">Imprimir</button>
+        <a class="boton boton-secundario" href="{% url 'pagos:detalle_factura' factura.id %}">Volver</a>
+    </div>
+
+    <header class="impresion-encabezado">
+        <div>
+            <h1>AutoNova</h1>
+            <p class="texto-suave">Concesionario</p>
+        </div>
+        <div class="texto-derecha">
+            <h2>Factura {{ factura.numero_factura }}</h2>
+            <p class="texto-suave">Emitida el {{ factura.fecha_emision|date:"d/m/Y" }}</p>
+            {% include 'parciales/estado.html' with valor=factura.estado texto=factura.get_estado_display %}
+        </div>
+    </header>
+
+    <div class="datos separado">
+        <div class="dato"><small>Cliente</small><span>{{ factura.nombre_cliente }}</span></div>
+        <div class="dato"><small>Cedula</small><span>{{ factura.cedula_cliente }}</span></div>
+        <div class="dato"><small>Vehiculo</small><span>{{ factura.placa_vehiculo }}</span></div>
+    </div>
+
+    {% if factura.anulacion %}
+    <div class="alerta alerta-error separado">Factura anulada el {{ factura.anulacion.fecha|date:"d/m/Y" }}. Motivo: {{ factura.anulacion.motivo }}</div>
+    {% endif %}
+
+    <table class="separado">
+        <thead><tr><th>Concepto</th><th>Descripcion</th><th class="texto-derecha">Cant.</th><th class="texto-derecha">Valor unitario</th><th class="texto-derecha">Valor</th></tr></thead>
+        <tbody>
+        {% for item in items %}
+            <tr>
+                <td>{{ item.nombre }}</td>
+                <td>{{ item.descripcion|default:"—" }}</td>
+                <td class="texto-derecha">{{ item.cantidad }}</td>
+                <td class="texto-derecha">${{ item.valor_unitario|floatformat:0 }}</td>
+                <td class="texto-derecha">${{ item.valor|floatformat:0 }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="impresion-totales separado">
+        <div class="resumen-total"><span>Subtotal</span><span>${{ factura.subtotal|floatformat:0 }}</span></div>
+        <div class="resumen-total"><span>IVA ({{ iva_porcentaje|floatformat:"-2" }} %)</span><span>${{ factura.impuesto_iva|floatformat:0 }}</span></div>
+        <div class="resumen-total final"><span>Total</span><span>${{ factura.total|floatformat:0 }}</span></div>
+        <div class="resumen-total"><span>Pagado</span><span>${{ pagado|floatformat:0 }}</span></div>
+        <div class="resumen-total"><span class="fuerte">Saldo</span><span class="fuerte">${{ saldo|floatformat:0 }}</span></div>
+    </div>
+
+    {% if cuotas %}
+    <h3 class="separado">Plan de cuotas</h3>
+    <table>
+        <thead><tr><th>Cuota</th><th>Vencimiento</th><th>Estado</th><th class="texto-derecha">Valor</th></tr></thead>
+        <tbody>
+        {% for cuota in cuotas %}
+            <tr><td>{{ cuota.numero }}</td><td>{{ cuota.fecha_vencimiento|date:"d/m/Y" }}</td><td>{{ cuota.texto_estado }}</td><td class="texto-derecha">${{ cuota.valor|floatformat:0 }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if pagos %}
+    <h3 class="separado">Pagos recibidos</h3>
+    <table>
+        <thead><tr><th>Fecha</th><th>Medio</th><th>Referencia</th><th class="texto-derecha">Monto</th></tr></thead>
+        <tbody>
+        {% for pago in pagos %}
+            <tr><td>{{ pago.fecha_pago|date:"d/m/Y" }}</td><td>{{ pago.medio }} · {{ pago.forma }}</td><td>{{ pago.numero_referencia|default:"—" }}</td><td class="texto-derecha">${{ pago.monto|floatformat:0 }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+</body>
+</html>

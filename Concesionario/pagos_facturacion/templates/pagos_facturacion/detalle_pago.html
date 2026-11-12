@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+
+{% block titulo_pagina %}Pago {{ numero }} · {{ factura.numero_factura }}{% endblock %}
+{% block miga %}<a href="{% url 'pagos:lista_facturas' %}">Facturas</a> / <a href="{% url 'pagos:detalle_factura' factura.id %}">{{ factura.numero_factura }}</a> / Pago {{ numero }}{% endblock %}
+{% block titulo %}Pago de ${{ pago.monto|floatformat:0 }}{% endblock %}
+{% block subtitulo %}Pago {{ numero }} de {{ cantidad }} de la factura {{ factura.numero_factura }} · {{ factura.nombre_cliente }}{% endblock %}
+{% block acciones %}
+    {% if factura.estado != 'anulada' %}
+    <a class="boton boton-secundario" href="{% url 'pagos:editar_pago' factura.id indice %}">
+        {% include 'parciales/icono.html' with nombre='editar' %} Editar
+    </a>
+    <a class="boton boton-suave-peligro" href="{% url 'pagos:eliminar_pago' factura.id indice %}">
+        {% include 'parciales/icono.html' with nombre='eliminar' %} Eliminar
+    </a>
+    {% endif %}
+{% endblock %}
+
+{% block contenido %}
+<div class="rejilla rejilla-lateral">
+    <div class="tarjeta">
+        <div class="tarjeta-titulo"><h2>Datos del pago</h2></div>
+        <div class="tarjeta-cuerpo">
+            <div class="datos">
+                <div class="dato"><small>Fecha</small><span>{{ pago.fecha_pago|date:"d M Y" }}</span></div>
+                <div class="dato"><small>Monto</small><span class="monto">${{ pago.monto|floatformat:0 }}</span></div>
+                <div class="dato"><small>Medio</small><span>{{ medio }}</span></div>
+                <div class="dato"><small>Forma</small><span>{{ forma }}</span></div>
+                <div class="dato"><small>Referencia</small><span>{{ pago.numero_referencia|default:"—" }}</span></div>
+            </div>
+            <div class="dato separado"><small>Observaciones</small><span>{{ pago.observaciones|default:"Sin observaciones" }}</span></div>
+            {% if factura.estado == 'anulada' %}
+            <div class="alerta alerta-aviso separado">La factura esta anulada: este pago es dinero por devolver al cliente.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="tarjeta">
+        <div class="tarjeta-cuerpo">
+            <div class="tarjeta-titulo" style="padding: 0 0 12px; border: 0">
+                <h2>Factura</h2>
+                {% include 'parciales/estado.html' with valor=factura.estado texto=factura.get_estado_display %}
+            </div>
+            <div class="resumen-total"><span>Total factura</span><span>${{ factura.total|floatformat:0 }}</span></div>
+            <div class="resumen-total"><span>Pagado hasta este pago</span><span>${{ acumulado|floatformat:0 }}</span></div>
+            <div class="resumen-total final"><span>Saldo despues de este pago</span><span>${{ saldo_despues|floatformat:0 }}</span></div>
+            <div class="separado"><a class="boton boton-secundario" href="{% url 'pagos:detalle_factura' factura.id %}">Ver factura</a></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
