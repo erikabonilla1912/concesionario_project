@@ -26,7 +26,7 @@
             </thead>
             <tbody>
             {% for fila in filas %}
-                <tr class="fila-enlace" onclick="window.location='{% url 'historial:detalle_historial' fila.vehiculo.id %}'">
+                <tr class="fila-enlace" data-href="{% url 'historial:detalle_historial' fila.vehiculo.id %}">
                     <td><span class="fuerte">{{ fila.vehiculo.marca }} {{ fila.vehiculo.modelo }} {{ fila.vehiculo.anio|stringformat:"d" }}</span><br>
                         <span class="texto-suave texto-pequeno">{{ fila.vehiculo.placa }}</span></td>
                     <td class="texto-derecha">{{ fila.duenos }}</td>

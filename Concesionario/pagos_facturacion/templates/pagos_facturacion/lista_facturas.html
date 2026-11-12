@@ -32,7 +32,7 @@
             </thead>
             <tbody>
             {% for fila in filas %}
-                <tr class="fila-enlace" onclick="window.location='{% url 'pagos:detalle_factura' fila.factura.id %}'">
+                <tr class="fila-enlace" data-href="{% url 'pagos:detalle_factura' fila.factura.id %}">
                     <td><span class="fuerte">{{ fila.factura.numero_factura }}</span><br>
                         <span class="texto-suave texto-pequeno">{{ fila.factura.fecha_emision|date:"d M Y" }}</span></td>
                     <td>{{ fila.factura.nombre_cliente }}<br><span class="texto-suave texto-pequeno">C.C. {{ fila.factura.cedula_cliente }}</span></td>

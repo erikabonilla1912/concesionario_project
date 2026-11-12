@@ -17,7 +17,6 @@ class FormularioCliente(forms.Form):
         super().__init__(*args, **kwargs)
         self.editando = editando
         if editando:
-            # La cédula identifica al cliente: no se cambia
             self.fields['cedula'].disabled = True
 
     def clean_cedula(self):
@@ -51,7 +50,6 @@ class FormularioVehiculo(forms.Form):
         super().__init__(*args, **kwargs)
         self.editando = editando
         if editando:
-            # La placa es única y queda copiada en cotizaciones y facturas
             self.fields['placa'].disabled = True
 
     def clean_placa(self):

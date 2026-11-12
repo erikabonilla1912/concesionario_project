@@ -26,7 +26,7 @@
             </thead>
             <tbody>
             {% for plantilla in plantillas %}
-                <tr class="fila-enlace" onclick="window.location='{% url 'ventas:detalle_plantilla' plantilla.id %}'">
+                <tr class="fila-enlace" data-href="{% url 'ventas:detalle_plantilla' plantilla.id %}">
                     <td><span class="fuerte">{{ plantilla.nombre }}</span><br>
                         <span class="texto-suave texto-pequeno">{{ plantilla.descripcion|default:"Sin descripción"|truncatechars:70 }}</span></td>
                     <td class="texto-derecha">{{ plantilla.condiciones|length }}</td>

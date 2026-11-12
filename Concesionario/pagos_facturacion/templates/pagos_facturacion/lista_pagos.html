@@ -26,7 +26,7 @@
             </thead>
             <tbody>
             {% for pago in pagos %}
-                <tr class="fila-enlace" onclick="window.location='{% url 'pagos:detalle_pago' pago.factura.id pago.indice %}'">
+                <tr class="fila-enlace" data-href="{% url 'pagos:detalle_pago' pago.factura.id pago.indice %}">
                     <td class="texto-suave">{{ pago.fecha_pago|date:"d M Y" }}</td>
                     <td><span class="fuerte">{{ pago.factura.numero_factura }}</span>{% if pago.anulada %}<br>{% include 'parciales/estado.html' with valor='anulada' texto='Anulada · por devolver' %}{% endif %}</td>
                     <td>{{ pago.factura.nombre_cliente }}</td>

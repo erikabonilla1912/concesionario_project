@@ -1,6 +1,5 @@
 from djongo import models
 
-# PropietarioAnterior, Mantenimiento y Siniestro se definen una sola vez en historial_vehiculo
 from historial_vehiculo.models import Mantenimiento, PropietarioAnterior, Siniestro
 
 
@@ -43,7 +42,6 @@ class Vehiculo(models.Model):
 
 
 class Seguimiento(models.Model):
-    """Contacto del asesor con el cliente (llamada, visita, correo...)."""
     MEDIOS = [
         ('llamada', 'Llamada'),
         ('visita', 'Visita'),
@@ -67,8 +65,6 @@ class Cliente(models.Model):
     telefono = models.CharField(max_length=20)
     direccion = models.TextField(blank=True)
     fecha_registro = models.DateField(auto_now_add=True)
-    # Las cotizaciones viven en su propia colección (ventas_cotizaciones)
-    # para no tener objetos dentro de objetos.
     seguimientos = models.ArrayField(
         model_container=Seguimiento,
         blank=True,

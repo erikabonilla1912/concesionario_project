@@ -119,5 +119,12 @@
         {% block contenido %}{% endblock %}
     </main>
 </div>
+<script>
+    document.querySelectorAll('[data-href]').forEach(function (fila) {
+        fila.addEventListener('click', function () {
+            window.location = fila.dataset.href;
+        });
+    });
+</script>
 </body>
 </html>

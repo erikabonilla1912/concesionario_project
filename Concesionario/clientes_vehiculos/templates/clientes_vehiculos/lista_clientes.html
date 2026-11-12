@@ -26,7 +26,7 @@
             </thead>
             <tbody>
             {% for cliente in clientes %}
-                <tr class="fila-enlace" onclick="window.location='{% url 'clientes:detalle_cliente' cliente.id %}'">
+                <tr class="fila-enlace" data-href="{% url 'clientes:detalle_cliente' cliente.id %}">
                     <td>
                         <div class="persona">
                             <div class="avatar">{{ cliente.nombre|slice:":1" }}{{ cliente.apellido|slice:":1" }}</div>

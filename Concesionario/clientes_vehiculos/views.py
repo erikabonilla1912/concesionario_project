@@ -25,8 +25,6 @@ def buscar_vehiculo(id):
 
 
 def todas_las_cotizaciones(**filtro):
-    """Cotizaciones de la colección cotizaciones, las más recientes primero.
-    A cada una se le adjunta su cliente en el atributo .cliente para mostrarla."""
     clientes = {c.id: c for c in Cliente.objects.all()}
     lista = []
     for cotizacion in Cotizacion.objects.filter(**filtro).order_by('-fecha', '-id'):
@@ -40,8 +38,6 @@ def cotizaciones_de_placa(placa):
 
 
 def actualizar_estado_vehiculo(placa):
-    """El estado del vehículo depende de sus cotizaciones:
-    vendido si tiene una venta, reservado si tiene una cotización aprobada."""
     cotizaciones = cotizaciones_de_placa(placa)
     if any(c.venta for c in cotizaciones):
         estado = 'vendido'
@@ -55,8 +51,6 @@ def actualizar_estado_vehiculo(placa):
 def nombre_medio(medio):
     return dict(Seguimiento.MEDIOS)[medio]
 
-
-# ---------------- Clientes ----------------
 
 @requiere_permiso('clientes')
 def lista_clientes(request):
@@ -192,8 +186,6 @@ def eliminar_cliente(request, id):
     })
 
 
-# ---------------- Seguimientos (embebidos en el cliente) ----------------
-
 @requiere_permiso('clientes')
 def agregar_seguimiento(request, id):
     cliente = buscar_cliente(id)
@@ -271,8 +263,6 @@ def eliminar_seguimiento(request, id, indice):
         'id_cancelar': cliente.id,
     })
 
-
-# ---------------- Vehículos ----------------
 
 @requiere_permiso('clientes')
 def catalogo_vehiculos(request):

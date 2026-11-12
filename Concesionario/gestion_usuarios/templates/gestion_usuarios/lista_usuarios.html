@@ -32,7 +32,7 @@
             </thead>
             <tbody>
             {% for usuario in usuarios %}
-                <tr class="fila-enlace" onclick="window.location='{% url 'usuarios:detalle_usuario' usuario.id %}'">
+                <tr class="fila-enlace" data-href="{% url 'usuarios:detalle_usuario' usuario.id %}">
                     <td>
                         <div class="persona">
                             <div class="avatar avatar-azul">{{ usuario.nombre|slice:":1" }}{{ usuario.apellido|slice:":1" }}</div>
