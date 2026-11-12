@@ -15,9 +15,6 @@ class Rol(models.Model):
 
 
 class ResumenUsuario(models.Model):
-    """Datos básicos de un usuario que se copian en otros documentos
-    (vendedor de una cotización, creador de una plantilla).
-    Se define una sola vez aquí y lo reutilizan las demás apps."""
     nombre_usuario = models.CharField(max_length=150)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)

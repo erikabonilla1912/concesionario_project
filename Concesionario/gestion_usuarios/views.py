@@ -1,12 +1,9 @@
 import datetime
-
 from django.contrib.auth.hashers import check_password, make_password
 from django.db.models import Q
 from django.shortcuts import redirect, render
-
 from ventas_cotizaciones.models import Cotizacion
-from .forms import (MESES, ROLES, FormularioLogin, FormularioMeta, FormularioNotificacion,
-                    FormularioUsuario, clave_rol)
+from .forms import (MESES, ROLES, FormularioLogin, FormularioMeta, FormularioNotificacion, FormularioUsuario, clave_rol)
 from .models import Usuario
 from .sesion import iniciar_sesion, registrar_auditoria, requiere_permiso
 
@@ -19,7 +16,6 @@ def buscar_usuario(id):
 
 
 def actualizar_metas(nombre_usuario):
-    """Recalcula ventas_realizadas de cada meta del asesor a partir de las ventas registradas."""
     usuario = Usuario.objects.filter(nombre_usuario=nombre_usuario).first()
     if usuario is None or not usuario.metas:
         return
@@ -33,8 +29,6 @@ def actualizar_metas(nombre_usuario):
 def nombre_mes(numero):
     return dict(MESES)[numero]
 
-
-# ---------------- Inicio y cierre de sesión ----------------
 
 def login(request):
     if request.session.get('usuario'):
@@ -103,8 +97,6 @@ def crear_desde_formulario(datos):
         notificaciones=[],
     )
 
-
-# ---------------- CRUD de usuarios ----------------
 
 @requiere_permiso('usuarios')
 def lista_usuarios(request):
@@ -241,8 +233,6 @@ def eliminar_usuario(request, id):
     })
 
 
-# ---------------- Metas de ventas (embebidas en el usuario) ----------------
-
 @requiere_permiso('usuarios')
 def agregar_meta(request, id):
     usuario = buscar_usuario(id)
@@ -289,8 +279,6 @@ def eliminar_meta(request, id, indice):
                             f'Eliminó la meta de {nombre_mes(meta["mes"])} {meta["anio"]} de {usuario.nombre_usuario}')
     return redirect('usuarios:detalle_usuario', id=id)
 
-
-# ---------------- Notificaciones (embebidas en el usuario) ----------------
 
 @requiere_permiso()
 def notificaciones(request):

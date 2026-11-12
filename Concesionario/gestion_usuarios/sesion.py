@@ -1,13 +1,5 @@
-"""
-Manejo del inicio de sesión y de los permisos.
-
-El usuario que inicia sesión se guarda en request.session['usuario'] y sus
-permisos salen del rol embebido (perm_clientes, perm_ventas, ...).
-"""
 import datetime
-
 from django.shortcuts import redirect, render
-
 from .models import Usuario
 
 MODULOS = ['clientes', 'historial', 'ventas', 'pagos', 'usuarios']
@@ -26,7 +18,6 @@ def iniciar_sesion(request, usuario):
 
 
 def requiere_permiso(modulo=None):
-    """Decorador: exige sesión iniciada y, si se indica, permiso sobre el módulo."""
     def decorador(vista):
         def envoltura(request, *args, **kwargs):
             usuario = request.session.get('usuario')
@@ -40,7 +31,6 @@ def requiere_permiso(modulo=None):
 
 
 def registrar_auditoria(request, accion, modulo, descripcion, exitoso=True, usuario=None):
-    """Agrega un registro al arreglo auditoria del usuario (por defecto, el de la sesión)."""
     if usuario is None:
         datos = request.session.get('usuario')
         if datos is None:
@@ -60,7 +50,6 @@ def registrar_auditoria(request, accion, modulo, descripcion, exitoso=True, usua
 
 
 def vendedor_actual(request):
-    """ResumenUsuario (vendedor / creado_por) con los datos del usuario que tiene la sesión."""
     datos = request.session['usuario']
     return {
         'nombre_usuario': datos['nombre_usuario'],

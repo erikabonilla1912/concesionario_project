@@ -1,9 +1,7 @@
 from django import forms
-
 from .models import Usuario
 
 
-# Roles disponibles: se copian dentro del usuario como objeto embebido (Rol)
 ROLES = {
     'administrador': {
         'nombre': 'Administrador',
@@ -51,7 +49,6 @@ MESES = [(1, 'Enero'), (2, 'Febrero'), (3, 'Marzo'), (4, 'Abril'), (5, 'Mayo'), 
 
 
 def clave_rol(rol):
-    """Devuelve la clave de ROLES que corresponde al rol embebido de un usuario."""
     for clave, datos in ROLES.items():
         if rol and rol['nombre'] == datos['nombre']:
             return clave
@@ -74,7 +71,6 @@ class FormularioUsuario(forms.Form):
     rol = forms.ChoiceField(label='Rol', choices=OPCIONES_ROL)
 
     def __init__(self, *args, usuario=None, **kwargs):
-        # usuario: el que se está editando (None cuando es nuevo)
         super().__init__(*args, **kwargs)
         self.usuario = usuario
         if usuario:
